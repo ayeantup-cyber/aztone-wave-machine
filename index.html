@@ -1,64 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>                                       <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AZ-TØNE WAVE MACHINE</title>
-
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AZ-TØNE WAVE MACHINE</title>                   <link rel="stylesheet" href="styles.css" />
 </head>
+                                                      <body>
 
-<body>
+  <!-- Ambient background layer -->
+  <div class="background" aria-hidden="true"></div>     <div class="grid-overlay" aria-hidden="true"></div>
+                                                        <!-- ─── HEADER ─────────────────────────────────────────────── -->                                         <header class="app-header">
 
-<div class="background"></div>
+    <div class="logo" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="beam"></div>
+      <div class="center"></div>                          </div>
 
-<main class="container">
-
-    <div class="logo">
-
-        <div class="ring"></div>
-
-        <div class="beam"></div>
-
-        <div class="center"></div>
-
+    <div class="brand">
+      <h1>AZ-TØNE</h1>
+      <h2>WAVE MACHINE</h2>
+      <p class="subtitle">Mobile Sampler &bull; Wave Editor &bull; Beat Sketchpad</p>
     </div>
 
-    <h1>AZ-TØNE</h1>
+  </header>
 
-    <h2>WAVE MACHINE</h2>
+  <!-- ─── MAIN CONTENT ────────────────────────────────────────── -->
+  <main class="app-main" id="appMain">
 
-    <p class="subtitle">
+    <!-- Landing / Folder pick state -->
+    <section class="landing" id="landingSection">
 
-        Mobile Sampler • Wave Editor • Beat Sketchpad
-
-    </p>
-
-    <button id="folderButton">
-
+      <button class="btn-primary" id="folderButton">
+        <span class="btn-icon">📂</span>
         Choose Sample Folder
+      </button>
 
-    </button>
+      <p class="status" id="statusText">No folder selected.</p>
 
-    <div class="status">
+    </section>
 
-        No folder selected.
+    <!-- Browser state (hidden until folder chosen) -->
+    <section class="browser" id="browserSection" hidden>
+
+      <!-- Toolbar: search + meta -->
+      <div class="browser-toolbar">
+
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search samples…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>✕</button>
+        </div>
+
+        <div class="browser-meta">
+          <span id="sampleCount" class="meta-count">0 samples</span>
+          <button class="btn-ghost btn-sm" id="changeFolderBtn">Change Folder</button>
+        </div>
+
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState" hidden>
+        <p class="empty-icon">🎵</p>
+        <p class="empty-title">No samples match your search.</p>
+        <p class="empty-sub">Try a different keyword.</p>
+      </div>
+
+      <!-- Sample grid -->
+      <div class="sample-grid" id="sampleGrid" role="list" aria-label="Sample library"></div>
+
+    </section>
+
+  </main>
+
+  <!-- ─── BOTTOM PLAYER ───────────────────────────────────────── -->
+  <!--
+    The bottom player floats above everything while a sample is previewing.
+    Hidden by default; shown by ui.js when playback starts.
+
+    FUTURE: favorites button, load-to-track button, waveform mini-view.
+  -->
+  <div class="bottom-player" id="bottomPlayer" aria-live="polite" hidden>
+
+    <div class="player-info">
+      <span class="player-label">PREVIEWING</span>
+      <span class="player-name" id="playerName">—</span>
+    </div>
+
+    <div class="player-progress-wrap">
+      <span class="player-time" id="playerCurrentTime">0:00</span>
+
+      <div class="player-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="player-progress-fill" id="playerProgressFill"></div>
+      </div>
+
+      <span class="player-time" id="playerDuration">0:00</span>
+    </div>
+
+    <div class="player-controls">
+
+      <!-- FUTURE: Favorite button placeholder -->
+      <!-- <button class="btn-icon-only" id="favoriteBtn" title="Favorite" disabled>♡</button> -->
+
+      <button class="btn-stop" id="playerStopBtn" title="Stop preview">
+        ■ Stop
+      </button>
+
+      <!-- FUTURE: Load to Track button placeholder -->
+      <!-- <button class="btn-ghost btn-sm" id="loadTrackBtn" disabled>Load Track</button> -->
 
     </div>
 
-    <div id="sampleList"></div>
+  </div>
 
-    <footer>
+  <!-- ─── FOOTER ───────────────────────────────────────────────── -->
+  <footer class="app-footer">
+    <span>Version 0.0.2</span>
+    <span class="footer-dot" aria-hidden="true">·</span>
+    <span>Built with ❤️ by AIITONE</span>
+  </footer>
 
-        Version 0.0.1<br>
-
-        Built with ❤️ by AIITONE
-
-    </footer>
-
-</main>
-
-<script src="script.js"></script>
+  <!--
+    ES Module entry point.
+    script.js is the thin orchestrator that imports all other modules.
+  -->
+  <script type="module" src="script.js"></script>
 
 </body>
 </html>
