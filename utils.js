@@ -2,14 +2,19 @@
  * utils.js
  * ─────────────────────────────────────────────────────────────
  * Pure utility functions shared across all AZ-TØNE modules.
- * No side-effects, no DOM access, no audio APIs here. *
- * FUTURE: tempo detection helpers, pitch helpers, ADSR math, etc.                                           */
+ * No side-effects, no DOM access, no audio APIs here.
+ *
+ * FUTURE: tempo detection helpers, pitch helpers, ADSR math, etc.
+ */
 
-// ── Supported audio extensions ────────────────────────────────                                           // Add new types here — the rest of the app picks them up automatically.
+// ── Supported audio extensions ────────────────────────────────
+// Add new types here — the rest of the app picks them up automatically.
 export const SUPPORTED_EXTENSIONS = new Set([
   'wav',
-  'mp3',                                                'ogg',
-  // FUTURE: 'flac', 'aiff', 'm4a', 'opus'            ]);
+  'mp3',
+  'ogg',
+  // FUTURE: 'flac', 'aiff', 'm4a', 'opus'
+]);
 
 /**
  * Returns true if the filename has a supported audio extension.
