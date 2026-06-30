@@ -1,16 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════
-   AZ-TØNE WAVE MACHINE — styles.css                     v0.0.2
+   AZ-TØNE WAVE MACHINE — styles.css
+   v0.0.2
 
    Token system:
      --clr-bg          #050509      Matte black
      --clr-surface     #0e0e16      Card surface
      --clr-surface-2   #14141f      Elevated surface
-     --clr-border      #1e1e32      Subtle border          --clr-border-glow #3b2d6e      Glowing border (hover)
-     --clr-purple-hi   #a855f7      Primary neon purple                                                          --clr-purple-mid  #8b5cf6      Mid purple (buttons)
+     --clr-border      #1e1e32      Subtle border
+     --clr-border-glow #3b2d6e      Glowing border (hover)
+     --clr-purple-hi   #a855f7      Primary neon purple
+     --clr-purple-mid  #8b5cf6      Mid purple (buttons)
      --clr-purple-lo   #5b21b6      Deep purple
      --clr-purple-dim  #3b2d6e      Dim purple (borders, glows)
      --clr-text        #e8e8f0      Primary text
-     --clr-text-2      #9898b0      Secondary text         --clr-text-3      #555570      Muted text
+     --clr-text-2      #9898b0      Secondary text
+     --clr-text-3      #555570      Muted text
      --clr-play        #22c55e      Play green accent
      --clr-stop        #ef4444      Stop red accent
 
