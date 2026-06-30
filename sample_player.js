@@ -7,16 +7,14 @@
  *   - Own and manage the single shared AudioContext.
  *   - Lazy-load audio: only fetch & decode when Preview is pressed.
  *   - Enforce one-at-a-time playback: starting a new preview
- *     automatically stops the previous one.
- *   - Provide a callback interface for the UI to respond to
+ *     automatically stops the previous one.                              *   - Provide a callback interface for the UI to respond to
  *     state changes without the player knowing about DOM nodes.
  *   - Release audio buffers and source nodes to free memory.
  *
  * NOT responsible for:
  *   - Rendering any DOM.
  *   - Knowing about sample cards.
- *   - The bottom player UI.
- *
+ *   - The bottom player UI.                                              *
  * FUTURE HOOKS (stubbed):
  *   - generateWaveform(buffer)   → Float32Array of peak data
  *   - loopPlayback(sample)       → loop point support
@@ -243,4 +241,3 @@ const SamplePlayer = {
 };
 
 export default SamplePlayer;
-
