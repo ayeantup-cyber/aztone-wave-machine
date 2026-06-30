@@ -1,10 +1,10 @@
 /**
  * ui.js
  * ─────────────────────────────────────────────────────────────
- * Controls all UI state that isn't tied to a specific sample card.                                          *
+ * Controls all UI state that isn't tied to a specific sample card.
+ *
  * Responsibilities:
- *   - Show / hide the landing section vs. browser section
- *   - Update status text
+ *   - Show / hide the landing section vs. browser section                *   - Update status text
  *   - Show / hide and update the bottom player bar
  *   - Progress bar animation
  *   - Search input handling
