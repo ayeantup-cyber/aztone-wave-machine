@@ -30,68 +30,136 @@
 
   </header>
 
+  <!-- ─── TOP NAV ────────────────────────────────────────────── -->
+  <nav class="top-nav" id="topNav">
+    <button class="nav-tab is-active" data-page="sampler">Sampler</button>
+    <button class="nav-tab" data-page="channelRack">Channel Rack</button>
+    <button class="nav-tab" data-page="pads">Pads</button>
+    <button class="nav-tab" data-page="pianoRoll" disabled>Piano Roll</button>
+    <button class="nav-tab" data-page="mixer" disabled>Mixer</button>
+    <button class="nav-tab" data-page="song" disabled>Song</button>
+  </nav>
+
+  <!-- ─── TRANSPORT BAR ──────────────────────────────────────── -->
+  <div class="transport-bar">
+    <button class="transport-btn" id="playBtn" title="Play">▶</button>
+    <button class="transport-btn" id="stopBtn" title="Stop">■</button>
+    <div class="bpm-control">
+      <label for="bpmInput">BPM</label>
+      <input type="number" id="bpmInput" min="40" max="300" value="126" />
+    </div>
+    <span class="time-sig">4/4</span>
+  </div>
+
   <!-- ─── MAIN CONTENT ────────────────────────────────────────── -->
   <main class="app-main" id="appMain">
 
-    <!-- Landing / Folder pick state -->
-    <section class="landing" id="landingSection">
+    <!-- ═══════════════ PAGE: SAMPLER (library) ═══════════════ -->
+    <section class="page" id="page-sampler">
 
-      <button class="btn-primary" id="folderButton">
-        <span class="btn-icon">📂</span>
-        Choose Sample Folder
-      </button>
+      <!-- Landing / Folder pick state -->
+      <section class="landing" id="landingSection">
+        <button class="btn-primary" id="folderButton">
+          <span class="btn-icon">📂</span>
+          Choose Sample Folder
+        </button>
 
-      <p class="status" id="statusText">No folder selected.</p>
+        <!-- Hidden native folder picker — works on desktop AND Android -->
+        <input type="file" id="folderInput" webkitdirectory multiple hidden />
+
+        <p class="status" id="statusText">No folder selected.</p>
+      </section>
+
+      <!-- Sample Editor (shows when a sample card is tapped) -->
+      <section class="editor" id="editorSection" hidden>
+        <div class="editor-header">
+          <span class="editor-label">SAMPLE EDITOR</span>
+          <span class="editor-name" id="editorName">—</span>
+          <button class="btn-ghost btn-sm" id="editorCloseBtn">✕ Close</button>
+        </div>
+
+        <div class="editor-waveform-wrap">
+          <canvas id="editorCanvas" class="editor-canvas"></canvas>
+          <p class="editor-loading" id="editorLoading" hidden>Decoding waveform…</p>
+        </div>
+
+        <div class="editor-controls">
+          <button class="btn-primary btn-sm" id="editorPlayBtn">▶ Play</button>
+          <button class="btn-ghost btn-sm" id="editorLoadBtn">+ Load to Channel Rack</button>
+        </div>
+      </section>
+
+      <!-- Browser state (hidden until folder chosen) -->
+      <section class="browser" id="browserSection" hidden>
+
+        <!-- Toolbar: search + meta -->
+        <div class="browser-toolbar">
+
+          <div class="search-wrap">
+            <span class="search-icon" aria-hidden="true">🔍</span>
+            <input
+              type="search"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search samples…"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>✕</button>
+          </div>
+
+          <div class="browser-meta">
+            <span id="sampleCount" class="meta-count">0 samples</span>
+            <button class="btn-ghost btn-sm" id="changeFolderBtn">Change Folder</button>
+          </div>
+
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" hidden>
+          <p class="empty-icon">🎵</p>
+          <p class="empty-title">No samples match your search.</p>
+          <p class="empty-sub">Try a different keyword.</p>
+        </div>
+
+        <!-- Sample grid -->
+        <div class="sample-grid" id="sampleGrid" role="list" aria-label="Sample library"></div>
+
+      </section>
 
     </section>
 
-    <!-- Browser state (hidden until folder chosen) -->
-    <section class="browser" id="browserSection" hidden>
+    <!-- ═══════════════ PAGE: CHANNEL RACK ═══════════════ -->
+    <section class="page" id="page-channelRack" hidden>
 
-      <!-- Toolbar: search + meta -->
-      <div class="browser-toolbar">
-
-        <div class="search-wrap">
-          <span class="search-icon" aria-hidden="true">🔍</span>
-          <input
-            type="search"
-            id="searchInput"
-            class="search-input"
-            placeholder="Search samples…"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button class="search-clear" id="searchClear" aria-label="Clear search" hidden>✕</button>
-        </div>
-
-        <div class="browser-meta">
-          <span id="sampleCount" class="meta-count">0 samples</span>
-          <button class="btn-ghost btn-sm" id="changeFolderBtn">Change Folder</button>
-        </div>
-
+      <div class="rack" id="rackContainer">
+        <!-- Rows injected by script.js -->
       </div>
 
-      <!-- Empty state -->
-      <div class="empty-state" id="emptyState" hidden>
-        <p class="empty-icon">🎵</p>
-        <p class="empty-title">No samples match your search.</p>
-        <p class="empty-sub">Try a different keyword.</p>
+      <p class="rack-hint">
+        Go to <strong>Sampler</strong>, tap a sample to open the editor, then
+        <strong>Load to Channel Rack</strong> to drop it into the next empty track.
+      </p>
+
+    </section>
+
+    <!-- ═══════════════ PAGE: PADS ═══════════════ -->
+    <section class="page" id="page-pads" hidden>
+
+      <div class="pads-header">
+        <span class="pads-title">PADS</span>
+        <span class="pads-hint">Tap to trigger &bull; Load samples in Sampler tab</span>
       </div>
 
-      <!-- Sample grid -->
-      <div class="sample-grid" id="sampleGrid" role="list" aria-label="Sample library"></div>
+      <div class="pads-grid" id="padsGrid">
+        <!-- 8 pads injected by script.js -->
+      </div>
 
     </section>
 
   </main>
 
   <!-- ─── BOTTOM PLAYER ───────────────────────────────────────── -->
-  <!--
-    The bottom player floats above everything while a sample is previewing.
-    Hidden by default; shown by ui.js when playback starts.
-
-    FUTURE: favorites button, load-to-track button, waveform mini-view.
-  -->
   <div class="bottom-player" id="bottomPlayer" aria-live="polite" hidden>
 
     <div class="player-info">
@@ -110,33 +178,22 @@
     </div>
 
     <div class="player-controls">
-
-      <!-- FUTURE: Favorite button placeholder -->
-      <!-- <button class="btn-icon-only" id="favoriteBtn" title="Favorite" disabled>♡</button> -->
-
       <button class="btn-stop" id="playerStopBtn" title="Stop preview">
         ■ Stop
       </button>
-
-      <!-- FUTURE: Load to Track button placeholder -->
-      <!-- <button class="btn-ghost btn-sm" id="loadTrackBtn" disabled>Load Track</button> -->
-
     </div>
 
   </div>
 
   <!-- ─── FOOTER ───────────────────────────────────────────────── -->
   <footer class="app-footer">
-    <span>Version 0.0.2</span>
+    <span>Version 0.1.0</span>
     <span class="footer-dot" aria-hidden="true">·</span>
     <span>Built with ❤️ by AIITONE</span>
   </footer>
 
-  <!--
-    ES Module entry point.
-    script.js is the thin orchestrator that imports all other modules.
-  -->
-  <script type="module" src="script.js"></script>
+  <script src="audioEngine.js"></script>
+  <script defer src="script.js"></script>
 
 </body>
 </html>
