@@ -1,11 +1,19 @@
 /* ═══════════════════════════════════════════════════════════════
-   AZ-TØNE WAVE MACHINE — script.js                     v0.2.0
+   AZ-TØNE WAVE MACHINE — script.js                     v0.3.0
    Orchestrator: page nav, sample library, sample editor,
    channel rack, pads, transport
+
+   v0.3.0 change: folder picking now uses a plain
+   <input type="file" webkitdirectory> element instead of the
+   File System Access API (showDirectoryPicker). That older API
+   only works on desktop Chrome/Edge — it does not exist on any
+   Android browser. webkitdirectory works everywhere: desktop
+   Chrome/Edge/Firefox, AND Android Chrome / Chromium browsers.
 ═══════════════════════════════════════════════════════════════ */
 
 // ── DOM refs: Sampler page ────────────────────────────────────────
 const folderButton    = document.getElementById('folderButton');
+const folderInput     = document.getElementById('folderInput');
 const changeFolderBtn = document.getElementById('changeFolderBtn');
 const statusText      = document.getElementById('statusText');
 const landingSection  = document.getElementById('landingSection');
@@ -111,39 +119,47 @@ navTabs.forEach(tab => {
 
 /* ══════════════════════════════════════════════════════════════
    SAMPLER — folder picker + library
+   Uses <input type="file" webkitdirectory> — a hidden file input
+   that we trigger programmatically. This opens the native folder
+   picker on desktop AND Android. When the user picks a folder,
+   the browser hands us every file inside it as a flat list.
 ══════════════════════════════════════════════════════════════ */
-async function pickFolder() {
-  if (!window.showDirectoryPicker) {
-    statusText.textContent = '⚠ Folder access not supported in this browser. Use Chrome or Edge.';
-    return;
-  }
-  try {
-    const dir = await window.showDirectoryPicker({ mode: 'read' });
-    statusText.textContent = `📁 ${dir.name}`;
-    await loadSamples(dir);
-  } catch (err) {
-    if (err.name !== 'AbortError') {
-      statusText.textContent = '⚠ Could not read folder.';
-      console.error('[pickFolder]', err);
-    }
-  }
-}
+folderButton.addEventListener('click', () => {
+  // Reset the input's value first. Without this, picking the SAME
+  // folder twice in a row won't fire a 'change' event the second time.
+  folderInput.value = '';
+  folderInput.click();
+});
 
-async function loadSamples(dir) {
+folderInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  await loadSamplesFromFiles(files);
+});
+
+async function loadSamplesFromFiles(files) {
   stopPreviewPlayback();
   closeEditor();
   allSamples = [];
   bufferCache.clear();
   sampleGrid.innerHTML = '';
 
-  for await (const entry of dir.values()) {
-    if (entry.kind === 'file' && /\.(wav|mp3|ogg|flac|aiff?)$/i.test(entry.name)) {
-      const file = await entry.getFile();
-      allSamples.push({ name: entry.name, file });
-    }
-  }
+  const audioFiles = files.filter(f => /\.(wav|mp3|ogg|flac|aiff?)$/i.test(f.name));
+
+  audioFiles.forEach(file => {
+    allSamples.push({ name: file.name, file });
+  });
 
   allSamples.sort((a, b) => a.name.localeCompare(b.name));
+
+  // webkitRelativePath looks like "MyFolder/Kicks/kick1.wav" — the
+  // first segment is the folder name the user picked.
+  const folderName = files[0]?.webkitRelativePath?.split('/')[0] || 'Selected Folder';
+  statusText.textContent = `📁 ${folderName}`;
+
+  if (audioFiles.length === 0) {
+    statusText.textContent = `📁 ${folderName} — no audio files found (.wav, .mp3, .ogg, .flac, .aiff)`;
+  }
 
   landingSection.hidden = true;
   browserSection.hidden = false;
@@ -299,7 +315,6 @@ searchClear.addEventListener('click', () => {
   searchInput.focus();
 });
 
-folderButton.addEventListener('click', pickFolder);
 changeFolderBtn.addEventListener('click', () => {
   stopPreviewPlayback();
   closeEditor();
@@ -323,7 +338,6 @@ async function openEditor(name, file) {
   editorPlayBtn.textContent = '▶ Play';
   editorPlayBtn.classList.remove('is-playing');
 
-  // Scroll the editor into view so it's obvious something opened
   editorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const cached = bufferCache.get(name);
@@ -334,20 +348,19 @@ async function openEditor(name, file) {
   }
 
   editorLoading.hidden = false;
+  editorLoading.textContent = 'Decoding waveform…';
   clearCanvas();
 
   try {
     const buffer = await AudioEngine.loadBuffer(file);
     bufferCache.set(name, buffer);
 
-    // Guard: user may have opened a different sample while this decoded
     if (!editorSample || editorSample.name !== name) return;
 
     editorBuffer = buffer;
     editorLoading.hidden = true;
     drawWaveform(editorBuffer);
   } catch (err) {
-    editorLoading.hidden = true;
     editorLoading.hidden = false;
     editorLoading.textContent = '⚠ Could not decode this sample.';
     console.error('[openEditor]', err);
@@ -434,7 +447,6 @@ editorPlayBtn.addEventListener('click', () => {
 
   AudioEngine.init();
   const source = AudioEngine.previewBuffer(editorBuffer, () => {
-    // Playback finished naturally
     editorSourceNode = null;
     editorPlayBtn.textContent = '▶ Play';
     editorPlayBtn.classList.remove('is-playing');
@@ -499,7 +511,7 @@ function renderRack() {
     muteBtn.addEventListener('click', () => {
       track.muted = !track.muted;
       muteBtn.classList.toggle('is-active-mute', track.muted);
-      renderPads(); // keep pad dimming in sync with mute state
+      renderPads();
     });
 
     rackContainer.appendChild(row);
@@ -507,7 +519,6 @@ function renderRack() {
 }
 
 async function loadIntoTrack(name, file, card) {
-  // Find next empty track
   const emptyTrack = tracks.find(t => !t.name);
   if (!emptyTrack) {
     statusText.textContent = '⚠ All 8 tracks are full. Clear one in Channel Rack first.';
@@ -521,7 +532,6 @@ async function loadIntoTrack(name, file, card) {
   }
 
   try {
-    // Reuse a cached buffer if the editor already decoded this sample
     const buffer = bufferCache.get(name) || await AudioEngine.loadBuffer(file);
     bufferCache.set(name, buffer);
 
