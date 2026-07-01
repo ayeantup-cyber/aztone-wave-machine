@@ -1,6 +1,7 @@
 /**
  * sample-browser.js
- * ─────────────────────────────────────────────────────────────
+ * 
+─────────────────────────────────────────────────────────────
  * Owns the sample library: reads folders, builds Sample objects,
  * renders cards, and handles search filtering.
  *
@@ -37,7 +38,8 @@
 import { isSupportedAudio, friendlyName, detectCategory, formatTime, uid } from './utils.js';
 import SamplePlayer from './sample-player.js';
 
-// ── Internal state ────────────────────────────────────────────
+// ── Internal state 
+────────────────────────────────────────────
 let allSamples    = [];   // master list, never mutated after load
 let filteredSamples = []; // current filtered view
 let searchQuery   = '';
@@ -47,12 +49,14 @@ let gridEl        = null;
 let countEl       = null;
 let emptyEl       = null;
 
-// ── Card element map ──────────────────────────────────────────
+// ── Card element map 
+──────────────────────────────────────────
 // Maps sample.id → <div class="sample-card"> element.
 // Allows O(1) lookups when updating card state from player events.
 const cardMap = new Map();
 
-// ── Public API ────────────────────────────────────────────────
+// ── Public API 
+────────────────────────────────────────────────
 
 const SampleBrowser = {
 
@@ -190,7 +194,8 @@ const SampleBrowser = {
   /** Returns the currently filtered sample list. */
   getFilteredSamples() { return filteredSamples; },
 
-  // ── Private ─────────────────────────────────────────────────
+  // ── Private 
+─────────────────────────────────────────────────
 
   /**
    * Renders the filtered sample list into the grid.
@@ -245,7 +250,8 @@ const SampleBrowser = {
       <div class="card-top">
         <span class="card-icon" aria-hidden="true">${icon}</span>
         <div style="flex:1;min-width:0">
-          <div class="card-name" title="${escapeHtml(sample.filename)}">${escapeHtml(sample.name)}</div>
+          <div class="card-name" 
+title="${escapeHtml(sample.filename)}">${escapeHtml(sample.name)}</div>
           <div class="card-duration">—</div>
         </div>
         ${catHTML}
@@ -281,7 +287,8 @@ const SampleBrowser = {
 
 };
 
-// ── Helpers ───────────────────────────────────────────────────
+// ── Helpers 
+───────────────────────────────────────────────────
 
 /** Returns a suitable emoji for a given audio extension. */
 function extIcon(ext) {
@@ -323,3 +330,4 @@ export default SampleBrowser;
  * @property {Float32Array|null}         waveform
  * @property {string[]}                  tags
  */
+
