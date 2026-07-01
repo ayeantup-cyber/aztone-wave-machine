@@ -1,144 +1,721 @@
-/**
- * script.js
- * ─────────────────────────────────────────────────────────────
- * AZ-TØNE WAVE MACHINE — Main entry point (ES Module).
- *
- * This file is intentionally thin. It:
- *   1. Imports all modules.
- *   2. Initialises each module with the DOM refs it needs.
- *   3. Wires player events → UI + browser card state.
- *   4. Handles the folder-picker flow.
- *   5. Does NOT contain business logic or audio code.
- *
- * Think of this as the conductor — not a musician.
- *
- * FUTURE: This is where you'll import and initialise:
- *   - KeyboardSampler
- *   - ChannelRack
- *   - Mixer
- *   - EffectsRack
- *   - PatternSequencer
- *   - ProjectManager (save/load)
- *   - ExportEngine
- */
+/* 
+═══════════════════════════════════════════════════════════════
+   AZ-TØNE WAVE MACHINE — 
+script.js                     
+v0.1.0
+   Orchestrator: page nav, 
+sample library, channel rack, 
+transport
+═══════════════════════════════════════════════════════════════ 
+*/
 
-import SamplePlayer  from './sample-player.js';
-import SampleBrowser from './sample-browser.js';
-import UI            from './ui.js';
+// ── DOM refs: Sampler page 
+────────────────────────────────────────
+const folderButton    = 
+document.getElementById('folderButton');
+const changeFolderBtn = 
+document.getElementById('changeFolderBtn');
+const statusText      = 
+document.getElementById('statusText');
+const landingSection  = 
+document.getElementById('landingSection');
+const browserSection  = 
+document.getElementById('browserSection');
+const sampleGrid      = 
+document.getElementById('sampleGrid');
+const sampleCount     = 
+document.getElementById('sampleCount');
+const searchInput     = 
+document.getElementById('searchInput');
+const searchClear     = 
+document.getElementById('searchClear');
+const emptyState      = 
+document.getElementById('emptyState');
 
-// ── DOM refs ──────────────────────────────────────────────────
-const folderButton    = document.getElementById('folderButton');
-const changeFolderBtn = document.getElementById('changeFolderBtn');
-const sampleGrid      = document.getElementById('sampleGrid');
-const sampleCount     = document.getElementById('sampleCount');
-const emptyState      = document.getElementById('emptyState');
+// Bottom player refs
+const bottomPlayer       = 
+document.getElementById('bottomPlayer');
+const playerName         = 
+document.getElementById('playerName');
+const playerStopBtn      = 
+document.getElementById('playerStopBtn');
+const playerProgressFill = 
+document.getElementById('playerProgressFill');
+const playerCurrentTime  = 
+document.getElementById('playerCurrentTime');
+const playerDuration     = 
+document.getElementById('playerDuration');
 
-// ── Module initialisation ─────────────────────────────────────
+// Nav + transport
+const navTabs     = 
+document.querySelectorAll('.nav-tab');
+const playBtn     = 
+document.getElementById('playBtn');
+const stopBtn     = 
+document.getElementById('stopBtn');
+const bpmInput    = 
+document.getElementById('bpmInput');
+const rackContainer = 
+document.getElementById('rackContainer');
 
-SampleBrowser.init({
-  grid:  sampleGrid,
-  count: sampleCount,
-  empty: emptyState,
-});
+// ── State 
+────────────────────────────────────────────────────────
+let allSamples   = [];   // [{ 
+name, file }]
+let currentAudio = null; // 
+<audio> element used for library 
+preview
+let currentCard  = null;
+let rafId        = null;
 
-UI.init({
-  onSearch: (query) => SampleBrowser.applyFilter(query),
-  onStop:   ()      => SamplePlayer.stop(),
-});
+const NUM_TRACKS = 8;
+const NUM_STEPS  = 16;
 
-// ── Player event → UI wiring ──────────────────────────────────
-// The player emits events; we react here and update both the
-// bottom player bar and the individual sample card.
+// Channel Rack track state
+// Each track: { name, file, 
+buffer, steps: [bool x16], 
+muted, label }
+const tracks = Array.from({ 
+length: NUM_TRACKS }, (_, i) => 
+({
+  name: null,
+  file: null,
+  buffer: null,
+  steps: 
+Array(NUM_STEPS).fill(false),
+  muted: false,
+  label: `TRACK ${i + 1}`,
+}));
 
-SamplePlayer
-  .on('play', (sample) => {
-    // Mark the playing card
-    SampleBrowser.setCardState(sample.id, 'playing');
-    // Show bottom player
-    UI.showPlayer(sample);
-  })
+// ── Helpers 
+──────────────────────────────────────────────────────
+const fmt = secs => {
+  const m = Math.floor(secs / 
+60);
+  const s = Math.floor(secs % 
+60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+};
 
-  .on('stop', (sample) => {
-    if (sample) SampleBrowser.setCardState(sample.id, 'idle');
-    UI.hidePlayer();
-  })
+function guessCategory(name) {
+  const n = name.toLowerCase();
+  if (/kick|bd/.test(n))             
+return 'Kick';
+  if (/snare|snr|clap/.test(n))      
+return 'Snare';
+  if 
+(/hat|hh|hihat|hi-hat/.test(n)) 
+return 'Hat';
+  if (/808|bass/.test(n))            
+return '808';
+  if (/perc|rim|tom/.test(n))        
+return 'Perc';
+  if (/pad|atm|amb/.test(n))         
+return 'Pad';
+  if (/lead|synth/.test(n))          
+return 'Synth';
+  if (/vocal|vox/.test(n))           
+return 'Vocal';
+  if (/fx|sfx/.test(n))              
+return 'FX';
+  return '';
+}
 
-  .on('loaded', (sample) => {
-    // Fired twice: once before decode (loading), once after (loaded).
-    if (sample.loaded) {
-      // Buffer is ready — card will flip to 'playing' on the 'play' event
-      // Update duration badge now that we know it
-      SampleBrowser.setCardState(sample.id, 'playing', { duration: sample.duration });
-    } else {
-      SampleBrowser.setCardState(sample.id, 'loading');
-    }
-  })
+/* 
+══════════════════════════════════════════════════════════════
+   PAGE NAVIGATION
+══════════════════════════════════════════════════════════════ 
+*/
+function switchPage(pageId) {
+  
+document.querySelectorAll('.page').forEach(p 
+=> { p.hidden = true; });
+  
+document.getElementById(`page-${pageId}`).hidden 
+= false;
 
-  .on('progress', (sample, currentTime, duration) => {
-    UI.updateProgress(currentTime, duration);
-  })
-
-  .on('error', (sample, err) => {
-    console.error('[App] Playback error for:', sample.name, err);
-    SampleBrowser.setCardState(sample.id, 'idle');
-    UI.hidePlayer();
-    UI.setStatus(`⚠️ Could not decode "${sample.name}"`);
+  navTabs.forEach(tab => {
+    
+tab.classList.toggle('is-active', 
+tab.dataset.page === pageId);
   });
+}
 
-// ── Folder selection flow ─────────────────────────────────────
+navTabs.forEach(tab => {
+  tab.addEventListener('click', 
+() => {
+    if (tab.disabled) return;
+    
+switchPage(tab.dataset.page);
+  });
+});
 
-async function openFolderPicker() {
-  // Guard: File System Access API required
-  if (!window.showDirectoryPicker) {
-    UI.setStatus('⚠️ Folder access requires Chrome, Edge, or Opera.');
+/* 
+══════════════════════════════════════════════════════════════
+   SAMPLER — folder picker + 
+library
+══════════════════════════════════════════════════════════════ 
+*/
+async function pickFolder() {
+  if 
+(!window.showDirectoryPicker) {
+    statusText.textContent = '⚠ 
+Folder access not supported in 
+this browser.';
     return;
   }
-
   try {
-    // Show the native folder picker
-    const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-
-    // Stop any active playback before switching libraries
-    SamplePlayer.stop();
-
-    // Update UI immediately so it feels responsive
-    UI.setStatus('⏳ Scanning folder…');
-    UI.clearSearch();
-    UI.showBrowser(dirHandle.name);
-
-    // Load samples from the selected directory
-    const count = await SampleBrowser.loadFolder(dirHandle);
-
-    if (count === 0) {
-      UI.setStatus(`📂 "${dirHandle.name}" — no supported audio files found.`);
-    } else {
-      UI.setStatus(`📂 ${dirHandle.name}`);
-    }
-
+    const dir = await 
+window.showDirectoryPicker({ 
+mode: 'read' });
+    statusText.textContent = `📁 
+${dir.name}`;
+    await loadSamples(dir);
   } catch (err) {
-    // User cancelled the picker — not an error worth surfacing
-    if (err.name === 'AbortError') return;
-
-    console.error('[App] Folder error:', err);
-    UI.setStatus('⚠️ Could not open folder.');
+    if (err.name !== 
+'AbortError') {
+      statusText.textContent = 
+'⚠ Could not read folder.';
+    }
   }
 }
 
-// Both buttons trigger the same flow
-folderButton.addEventListener('click', openFolderPicker);
-changeFolderBtn.addEventListener('click', openFolderPicker);
+async function loadSamples(dir) 
+{
+  stopPreviewPlayback();
+  allSamples = [];
+  sampleGrid.innerHTML = '';
 
-// ── FUTURE module hooks ───────────────────────────────────────
-// Uncomment and import as features are built:
-//
-// import KeyboardSampler  from './keyboard-sampler.js';
-// import ChannelRack      from './channel-rack.js';
-// import Mixer            from './mixer.js';
-// import EffectsRack      from './effects-rack.js';
-// import PatternSequencer from './pattern-sequencer.js';
-// import ProjectManager   from './project-manager.js';
-// import ExportEngine     from './export-engine.js';
-//
-// KeyboardSampler.init({ player: SamplePlayer });
-// ChannelRack.init({ player: SamplePlayer });
-// etc.
+  for await (const entry of 
+dir.values()) {
+    if (entry.kind === 'file' && 
+/\.(wav|mp3|ogg|flac|aiff?)$/i.test(entry.name)) 
+{
+      const file = await 
+entry.getFile();
+      allSamples.push({ name: 
+entry.name, file });
+    }
+  }
+
+  allSamples.sort((a, b) => 
+a.name.localeCompare(b.name));
+
+  landingSection.hidden = true;
+  browserSection.hidden = false;
+
+  renderGrid(allSamples);
+}
+
+function renderGrid(samples) {
+  sampleGrid.innerHTML = '';
+  sampleCount.textContent = 
+`${samples.length} 
+sample${samples.length !== 1 ? 
+'s' : ''}`;
+
+  if (samples.length === 0) {
+    emptyState.hidden = false;
+    return;
+  }
+  emptyState.hidden = true;
+
+  samples.forEach(({ name, file 
+}) => {
+    const card = 
+document.createElement('div');
+    card.className = 
+'sample-card';
+    card.setAttribute('role', 
+'listitem');
+
+    const tag = 
+guessCategory(name);
+    const isLoadedSomewhere = 
+tracks.some(t => t.name === 
+name);
+    if (isLoadedSomewhere) 
+card.classList.add('is-loaded-track');
+
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-icon" 
+aria-hidden="true">🎵</span>
+        <span class="card-name" 
+title="${name}">${name}</span>
+        ${tag ? `<span 
+class="card-category">${tag}</span>` 
+: ''}
+      </div>
+      <div class="card-actions">
+        <button 
+class="btn-preview">▶ 
+Preview</button>
+        <button class="btn-load" 
+title="Load into next empty 
+Channel Rack track">+ 
+Load</button>
+      </div>
+    `;
+
+    const previewBtn = 
+card.querySelector('.btn-preview');
+    
+previewBtn.addEventListener('click', 
+() => togglePreview(card, name, 
+file));
+
+    const loadBtn = 
+card.querySelector('.btn-load');
+    
+loadBtn.addEventListener('click', 
+() => loadIntoTrack(name, file, 
+card));
+
+    
+sampleGrid.appendChild(card);
+  });
+}
+
+/* ── Preview playback 
+(library) — uses <audio>, 
+separate from the
+   sequencer's Web Audio engine 
+since it's simpler for one-shots
+   with a progress bar / 
+scrubber UI 
+─────────────────────────────── 
+*/
+function togglePreview(card, 
+name, file) {
+  if (currentCard === card && 
+currentAudio && 
+!currentAudio.paused) {
+    stopPreviewPlayback();
+    return;
+  }
+  stopPreviewPlayback();
+
+  const url = 
+URL.createObjectURL(file);
+  const audio = new Audio(url);
+  currentAudio = audio;
+  currentCard  = card;
+
+  
+card.classList.add('is-loading');
+  const btn = 
+card.querySelector('.btn-preview');
+  btn.textContent = '… Loading';
+
+  
+audio.addEventListener('canplay', 
+() => {
+    
+card.classList.remove('is-loading');
+    
+card.classList.add('is-playing');
+    btn.textContent = '■ Stop';
+
+    playerName.textContent = 
+name;
+    playerDuration.textContent = 
+fmt(audio.duration || 0);
+    showPlayer();
+
+    audio.play();
+    trackProgress(audio);
+  }, { once: true });
+
+  
+audio.addEventListener('ended', 
+() => stopPreviewPlayback(), { 
+once: true });
+  
+audio.addEventListener('error', 
+() => {
+    stopPreviewPlayback();
+    statusText.textContent = '⚠ 
+Could not play this file.';
+  }, { once: true });
+}
+
+function stopPreviewPlayback() {
+  if (currentAudio) {
+    currentAudio.pause();
+    
+URL.revokeObjectURL(currentAudio.src);
+    currentAudio = null;
+  }
+  if (currentCard) {
+    
+currentCard.classList.remove('is-playing', 
+'is-loading');
+    const btn = 
+currentCard.querySelector('.btn-preview');
+    if (btn) btn.textContent = 
+'▶ Preview';
+    currentCard = null;
+  }
+  cancelAnimationFrame(rafId);
+  hidePlayer();
+}
+
+function trackProgress(audio) {
+  const tick = () => {
+    if (!audio || audio.paused) 
+return;
+    const pct = audio.duration ? 
+(audio.currentTime / 
+audio.duration) * 100 : 0;
+    
+playerProgressFill.style.width = 
+`${pct}%`;
+    
+playerCurrentTime.textContent = 
+fmt(audio.currentTime);
+    rafId = 
+requestAnimationFrame(tick);
+  };
+  rafId = 
+requestAnimationFrame(tick);
+}
+
+function showPlayer() {
+  bottomPlayer.hidden = false;
+  bottomPlayer.offsetHeight; // 
+force reflow for transition
+  
+bottomPlayer.classList.add('is-visible');
+}
+
+function hidePlayer() {
+  
+bottomPlayer.classList.remove('is-visible');
+  playerProgressFill.style.width 
+= '0%';
+  playerCurrentTime.textContent 
+= '0:00';
+  playerDuration.textContent = 
+'0:00';
+  playerName.textContent = '—';
+  setTimeout(() => { 
+bottomPlayer.hidden = true; }, 
+300);
+}
+
+/* ── Search 
+─────────────────────────────────────────────────────── 
+*/
+searchInput.addEventListener('input', 
+() => {
+  const q = 
+searchInput.value.trim().toLowerCase();
+  searchClear.hidden = q.length 
+=== 0;
+  const filtered = q
+    ? allSamples.filter(s => 
+s.name.toLowerCase().includes(q))
+    : allSamples;
+  renderGrid(filtered);
+});
+
+searchClear.addEventListener('click', 
+() => {
+  searchInput.value = '';
+  searchClear.hidden = true;
+  renderGrid(allSamples);
+  searchInput.focus();
+});
+
+folderButton.addEventListener('click', 
+pickFolder);
+changeFolderBtn.addEventListener('click', 
+() => {
+  stopPreviewPlayback();
+  browserSection.hidden = true;
+  landingSection.hidden = false;
+  statusText.textContent = 'No 
+folder selected.';
+  allSamples = [];
+});
+playerStopBtn.addEventListener('click', 
+stopPreviewPlayback);
+
+/* 
+══════════════════════════════════════════════════════════════
+   CHANNEL RACK
+══════════════════════════════════════════════════════════════ 
+*/
+function renderRack() {
+  rackContainer.innerHTML = '';
+
+  tracks.forEach((track, 
+trackIndex) => {
+    const row = 
+document.createElement('div');
+    row.className = 'rack-row' + 
+(track.name ? ' has-sample' : 
+'');
+    row.dataset.trackIndex = 
+trackIndex;
+
+    row.innerHTML = `
+      <div 
+class="rack-track-name">
+        <span 
+class="rack-track-label">${track.label}</span>
+        <span 
+class="rack-track-sample 
+${track.name ? '' : 
+'is-empty'}">
+          ${track.name ? 
+track.name : 'Empty — load a 
+sample'}
+        </span>
+      </div>
+      <div class="step-grid" 
+data-track="${trackIndex}"></div>
+      <div 
+class="rack-row-controls">
+        <button 
+class="rack-mini-btn mute-btn" 
+title="Mute">M</button>
+      </div>
+    `;
+
+    const stepGrid = 
+row.querySelector('.step-grid');
+    
+track.steps.forEach((isActive, 
+stepIndex) => {
+      const stepBtn = 
+document.createElement('button');
+      stepBtn.className = 'step' 
++ (isActive ? ' is-active' : 
+'');
+      stepBtn.dataset.step = 
+stepIndex;
+      
+stepBtn.addEventListener('click', 
+() => {
+        track.steps[stepIndex] = 
+!track.steps[stepIndex];
+        
+stepBtn.classList.toggle('is-active', 
+track.steps[stepIndex]);
+      });
+      
+stepGrid.appendChild(stepBtn);
+    });
+
+    const muteBtn = 
+row.querySelector('.mute-btn');
+    
+muteBtn.addEventListener('click', 
+() => {
+      track.muted = 
+!track.muted;
+      
+muteBtn.classList.toggle('is-active-mute', 
+track.muted);
+    });
+
+    
+rackContainer.appendChild(row);
+  });
+}
+
+async function 
+loadIntoTrack(name, file, card) 
+{
+  // Find next empty track
+  const emptyTrack = 
+tracks.find(t => !t.name);
+  if (!emptyTrack) {
+    statusText.textContent = '⚠ 
+All 8 tracks are full. Clear one 
+in Channel Rack first.';
+    return;
+  }
+
+  const loadBtn = 
+card.querySelector('.btn-load');
+  loadBtn.disabled = true;
+  loadBtn.textContent = '…';
+
+  try {
+    const buffer = await 
+AudioEngine.loadBuffer(file);
+    emptyTrack.name = name;
+    emptyTrack.file = file;
+    emptyTrack.buffer = buffer;
+
+    
+card.classList.add('is-loaded-track');
+    loadBtn.textContent = '✓ 
+Loaded';
+    setTimeout(() => {
+      loadBtn.disabled = false;
+      loadBtn.textContent = '+ 
+Load';
+    }, 1200);
+
+    renderRack();
+    renderPads();
+  } catch (err) {
+    loadBtn.disabled = false;
+    loadBtn.textContent = '+ 
+Load';
+    statusText.textContent = '⚠ 
+Could not decode this sample.';
+  }
+}
+
+/* 
+══════════════════════════════════════════════════════════════
+   TRANSPORT — wired to 
+AudioEngine scheduler
+══════════════════════════════════════════════════════════════ 
+*/
+function 
+highlightPlayhead(stepIndex) {
+  
+document.querySelectorAll('.step-grid').forEach(grid 
+=> {
+    
+grid.querySelectorAll('.step').forEach(s 
+=> 
+s.classList.remove('is-playhead'));
+    const stepEl = 
+grid.querySelector(`.step[data-step="${stepIndex}"]`);
+    if (stepEl) 
+stepEl.classList.add('is-playhead');
+  });
+}
+
+function clearPlayhead() {
+  
+document.querySelectorAll('.step.is-playhead').forEach(s 
+=> 
+s.classList.remove('is-playhead'));
+}
+
+playBtn.addEventListener('click', 
+() => {
+  if (AudioEngine.isRunning) {
+    AudioEngine.stop();
+    
+playBtn.classList.remove('is-playing');
+    clearPlayhead();
+    return;
+  }
+  AudioEngine.init();
+  
+AudioEngine.setBPM(parseInt(bpmInput.value, 
+10) || 126);
+  AudioEngine.start(tracks, 
+highlightPlayhead);
+  
+playBtn.classList.add('is-playing');
+});
+
+stopBtn.addEventListener('click', 
+() => {
+  AudioEngine.stop();
+  
+playBtn.classList.remove('is-playing');
+  clearPlayhead();
+});
+
+bpmInput.addEventListener('change', 
+() => {
+  const val = 
+parseInt(bpmInput.value, 10);
+  if (val) 
+AudioEngine.setBPM(val);
+});
+
+/* 
+══════════════════════════════════════════════════════════════
+   PADS
+══════════════════════════════════════════════════════════════ 
+*/
+const padsGrid = 
+document.getElementById('padsGrid');
+
+function renderPads() {
+  padsGrid.innerHTML = '';
+
+  tracks.forEach((track, i) => {
+    const pad = 
+document.createElement('div');
+    const cat = track.name ? 
+guessCategory(track.name) : '';
+
+    pad.className = [
+      'pad',
+      !track.name  ? 'is-empty' 
+: '',
+      track.muted  ? 'is-muted' 
+: '',
+    ].filter(Boolean).join(' ');
+
+    if (cat) 
+pad.dataset.category = cat;
+
+    // Short display name — 
+strip extension, truncate
+    const displayName = 
+track.name
+      ? 
+track.name.replace(/\.[^.]+$/, 
+'').slice(0, 22)
+      : 'Empty';
+
+    pad.innerHTML = `
+      <span 
+class="pad-number">PAD ${i + 
+1}</span>
+      <span 
+class="pad-name">${displayName}</span>
+      <span 
+class="pad-accent"></span>
+    `;
+
+    if (track.buffer && 
+!track.muted) {
+      
+pad.addEventListener('pointerdown', 
+e => {
+        e.preventDefault();
+        firePad(pad, track);
+      });
+    }
+
+    padsGrid.appendChild(pad);
+  });
+}
+
+let fireClearTimers = [];
+
+function firePad(pad, track) {
+  AudioEngine.init();
+  
+AudioEngine.triggerBuffer(track.buffer);
+
+  
+pad.classList.add('is-firing');
+  const t = setTimeout(() => 
+pad.classList.remove('is-firing'), 
+200);
+  fireClearTimers.push(t);
+}
+
+/* 
+══════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════ 
+*/
+renderRack();
+renderPads();
