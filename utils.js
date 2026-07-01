@@ -1,6 +1,7 @@
 /**
  * utils.js
- * ─────────────────────────────────────────────────────────────
+ * 
+─────────────────────────────────────────────────────────────
  * Pure utility functions shared across all AZ-TØNE modules.
  * No side-effects, no DOM access, no audio APIs here.
  *
@@ -127,3 +128,4 @@ export function debounce(fn, wait = 120) {
 export function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
+
