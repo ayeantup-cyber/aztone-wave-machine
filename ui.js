@@ -1,10 +1,12 @@
 /**
  * ui.js
- * ─────────────────────────────────────────────────────────────
+ * 
+─────────────────────────────────────────────────────────────
  * Controls all UI state that isn't tied to a specific sample card.
  *
  * Responsibilities:
- *   - Show / hide the landing section vs. browser section                *   - Update status text
+ *   - Show / hide the landing section vs. browser section
+ *   - Update status text
  *   - Show / hide and update the bottom player bar
  *   - Progress bar animation
  *   - Search input handling
@@ -24,7 +26,8 @@
 
 import { formatTime, debounce } from './utils.js';
 
-// ── DOM refs ──────────────────────────────────────────────────
+// ── DOM refs 
+──────────────────────────────────────────────────
 const el = {
   landing:         () => document.getElementById('landingSection'),
   browser:         () => document.getElementById('browserSection'),
@@ -45,7 +48,8 @@ function dom(key) {
   return cache[key] ??= el[key]?.();
 }
 
-// ── Public API ────────────────────────────────────────────────
+// ── Public API 
+────────────────────────────────────────────────
 
 const UI = {
 
@@ -77,7 +81,8 @@ const UI = {
     dom('playerStopBtn').addEventListener('click', () => onStop());
   },
 
-  // ── Section transitions ──────────────────────────────────────
+  // ── Section transitions 
+──────────────────────────────────────
 
   /**
    * Switch from the landing view to the sample browser.
@@ -98,7 +103,8 @@ const UI = {
     this.hidePlayer();
   },
 
-  // ── Status text ──────────────────────────────────────────────
+  // ── Status text 
+──────────────────────────────────────────────
 
   /** @param {string} text */
   setStatus(text) {
@@ -106,7 +112,8 @@ const UI = {
     if (s) s.textContent = text;
   },
 
-  // ── Bottom Player ────────────────────────────────────────────
+  // ── Bottom Player 
+────────────────────────────────────────────
 
   /**
    * Show the bottom player for a given sample.
@@ -169,7 +176,8 @@ const UI = {
     if (bar) bar.setAttribute('aria-valuenow', Math.round(pct));
   },
 
-  // ── Search helpers ───────────────────────────────────────────
+  // ── Search helpers 
+───────────────────────────────────────────
 
   /** Clear the search input programmatically (e.g. when folder changes). */
   clearSearch() {
@@ -179,7 +187,8 @@ const UI = {
     if (clr) clr.hidden = true;
   },
 
-  // ── FUTURE stubs ─────────────────────────────────────────────
+  // ── FUTURE stubs 
+─────────────────────────────────────────────
 
   /**
    * FUTURE: showToast(message, type)
@@ -196,3 +205,4 @@ const UI = {
 };
 
 export default UI;
+
