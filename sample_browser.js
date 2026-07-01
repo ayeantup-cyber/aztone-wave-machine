@@ -1,333 +1,245 @@
 /**
- * sample-browser.js
- * 
-─────────────────────────────────────────────────────────────
- * Owns the sample library: reads folders, builds Sample objects,
- * renders cards, and handles search filtering.
+ * sample-player.js
+ * ─────────────────────────────────────────────────────────────
+ * The audio engine for AZ-TØNE WAVE MACHINE.
  *
- * A "Sample" is the canonical data model for this application.
- * Every audio file becomes a Sample. The rest of the app never
- * thinks in terms of filesystem entries.
+ * Responsibilities:
+ *   - Own and manage the single shared AudioContext.
+ *   - Lazy-load audio: only fetch & decode when Preview is pressed.
+ *   - Enforce one-at-a-time playback: starting a new preview
+ *     automatically stops the previous one.                              *   - Provide a callback interface for the UI to respond to
+ *     state changes without the player knowing about DOM nodes.
+ *   - Release audio buffers and source nodes to free memory.
  *
- * Sample object shape:
- * {
- *   id:           string,           // unique internal ID
- *   name:         string,           // display-friendly name
- *   filename:     string,           // original filename
- *   ext:          string,           // 'wav' | 'mp3' | 'ogg' etc.
- *   handle:       FileSystemFileHandle,
- *   duration:     number | null,    // seconds; set after decode
- *   playing:      boolean,
- *   loaded:       boolean,
- *   buffer:       AudioBuffer | null, // set after first decode
- *   category:     string | null,    // detected or null
- *   favorite:     boolean,          // FUTURE
- *   assignedTrack: number | null,   // FUTURE: channel rack slot
- *   waveform:     Float32Array | null, // FUTURE: waveform data
- *   tags:         string[],         // FUTURE: user tags
- * }
- *
- * FUTURE HOOKS:
- *   - Recursive subfolder scanning
- *   - Sort by name / type / duration / recent
- *   - Tag filtering
- *   - Favorites filtering
- *   - Drag-and-drop
+ * NOT responsible for:
+ *   - Rendering any DOM.
+ *   - Knowing about sample cards.
+ *   - The bottom player UI.                                              *
+ * FUTURE HOOKS (stubbed):
+ *   - generateWaveform(buffer)   → Float32Array of peak data
+ *   - loopPlayback(sample)       → loop point support
+ *   - applyADSR(source, adsr)    → envelope shaping
+ *   - setPitch(source, semis)    → playbackRate for pitch shift
+ *   - loadToTrack(sample, track) → route audio to a channel
  */
 
-import { isSupportedAudio, friendlyName, detectCategory, formatTime, uid } from './utils.js';
-import SamplePlayer from './sample-player.js';
+import { clamp } from './utils.js';
 
-// ── Internal state 
-────────────────────────────────────────────
-let allSamples    = [];   // master list, never mutated after load
-let filteredSamples = []; // current filtered view
-let searchQuery   = '';
+// ── AudioContext ──────────────────────────────────────────────
+// Single context, created lazily on first user gesture.
+// Re-used for every subsequent preview.
+let ctx = null;
 
-// ── DOM refs (set once during init) ──────────────────────────
-let gridEl        = null;
-let countEl       = null;
-let emptyEl       = null;
+function getContext() {
+  if (!ctx || ctx.state === 'closed') {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Resume if suspended (browser autoplay policy)
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
 
-// ── Card element map 
-──────────────────────────────────────────
-// Maps sample.id → <div class="sample-card"> element.
-// Allows O(1) lookups when updating card state from player events.
-const cardMap = new Map();
-
-// ── Public API 
-────────────────────────────────────────────────
-
-const SampleBrowser = {
-
-  /**
-   * Initialise the browser with DOM references.
-   * Called once from script.js during app startup.
-   *
-   * @param {{ grid: HTMLElement, count: HTMLElement, empty: HTMLElement }} refs
-   */
-  init({ grid, count, empty }) {
-    gridEl    = grid;
-    countEl   = count;
-    emptyEl   = empty;
-  },
-
-  /**
-   * Load samples from a FileSystem Directory Handle.
-   * Replaces the current library.
-   *
-   * @param {FileSystemDirectoryHandle} dirHandle
-   * @returns {Promise<number>} count of samples found
-   */
-  async loadFolder(dirHandle) {
-    allSamples     = [];
-    filteredSamples = [];
-    cardMap.clear();
-    gridEl.innerHTML = '';
-
-    for await (const entry of dirHandle.values()) {
-      if (entry.kind !== 'file') continue;
-      if (!isSupportedAudio(entry.name)) continue;
-
-      /** @type {Sample} */
-      const sample = {
-        id:            uid(),
-        name:          friendlyName(entry.name),
-        filename:      entry.name,
-        ext:           entry.name.split('.').pop()?.toLowerCase() ?? '',
-        handle:        entry,
-        duration:      null,
-        playing:       false,
-        loaded:        false,
-        buffer:        null,
-        category:      detectCategory(entry.name),
-        favorite:      false,        // FUTURE
-        assignedTrack: null,         // FUTURE
-        waveform:      null,         // FUTURE
-        tags:          [],           // FUTURE
-      };
-
-      allSamples.push(sample);
-    }
-
-    // Sort alphabetically by display name
-    allSamples.sort((a, b) => a.name.localeCompare(b.name));
-
-    this.applyFilter(searchQuery);
-    return allSamples.length;
-  },
-
-  /**
-   * Filter the sample list by query string.
-   * Matches against both display name and original filename.
-   * Instant, case-insensitive.
-   *
-   * @param {string} query
-   */
-  applyFilter(query = '') {
-    searchQuery = query.trim().toLowerCase();
-
-    filteredSamples = searchQuery
-      ? allSamples.filter(s =>
-          s.name.toLowerCase().includes(searchQuery) ||
-          s.filename.toLowerCase().includes(searchQuery) ||
-          (s.category ?? '').toLowerCase().includes(searchQuery)
-        )
-      : [...allSamples];
-
-    this._renderGrid();
-  },
-
-  /**
-   * Update the visual state of a single card.
-   * Called by the player event handlers in script.js.
-   *
-   * @param {string} sampleId
-   * @param {'idle'|'loading'|'playing'} state
-   * @param {{ duration?: number }} [meta]
-   */
-  setCardState(sampleId, state, meta = {}) {
-    const card = cardMap.get(sampleId);
-    if (!card) return;
-
-    const previewBtn = card.querySelector('.btn-preview');
-    const durationEl = card.querySelector('.card-duration');
-
-    card.classList.remove('is-playing', 'is-loading');
-
-    switch (state) {
-      case 'playing':
-        card.classList.add('is-playing');
-        if (previewBtn) previewBtn.textContent = '■ Stop';
-        break;
-
-      case 'loading':
-        card.classList.add('is-loading');
-        if (previewBtn) previewBtn.textContent = '… Loading';
-        break;
-
-      case 'idle':
-      default:
-        if (previewBtn) previewBtn.textContent = '▶ Preview';
-        break;
-    }
-
-    // Update duration badge once known
-    if (meta.duration != null && durationEl) {
-      durationEl.textContent = formatTime(meta.duration);
-    }
-  },
-
-  /**
-   * Reset all cards to idle state.
-   * Called when playback stops globally.
-   */
-  resetAllCards() {
-    for (const [id] of cardMap) {
-      this.setCardState(id, 'idle');
-    }
-  },
-
-  /** Returns the full unfiltered sample list. */
-  getAllSamples() { return allSamples; },
-
-  /** Returns the currently filtered sample list. */
-  getFilteredSamples() { return filteredSamples; },
-
-  // ── Private 
-─────────────────────────────────────────────────
-
-  /**
-   * Renders the filtered sample list into the grid.
-   * Rebuilds card elements from scratch on each filter change.
-   *
-   * FUTURE: virtual scrolling for libraries with thousands of samples.
-   */
-  _renderGrid() {
-    gridEl.innerHTML = '';
-    cardMap.clear();
-
-    const count = filteredSamples.length;
-
-    // Update meta count
-    if (countEl) {
-      countEl.textContent = `${count} sample${count !== 1 ? 's' : ''}`;
-    }
-
-    // Show/hide empty state
-    if (emptyEl) {
-      emptyEl.hidden = count > 0;
-    }
-
-    for (const sample of filteredSamples) {
-      const card = this._buildCard(sample);
-      cardMap.set(sample.id, card);
-      gridEl.appendChild(card);
-    }
-  },
-
-  /**
-   * Builds a single sample card DOM element.
-   *
-   * @param {Sample} sample
-   * @returns {HTMLElement}
-   */
-  _buildCard(sample) {
-    const card = document.createElement('div');
-    card.className  = 'sample-card';
-    card.role       = 'listitem';
-    card.dataset.id = sample.id;
-
-    // Extension → emoji icon
-    const icon = extIcon(sample.ext);
-
-    // Category badge HTML (only if category detected)
-    const catHTML = sample.category
-      ? `<span class="card-category">${sample.category}</span>`
-      : '';
-
-    card.innerHTML = `
-      <div class="card-top">
-        <span class="card-icon" aria-hidden="true">${icon}</span>
-        <div style="flex:1;min-width:0">
-          <div class="card-name" 
-title="${escapeHtml(sample.filename)}">${escapeHtml(sample.name)}</div>
-          <div class="card-duration">—</div>
-        </div>
-        ${catHTML}
-      </div>
-      <div class="card-actions">
-        <button class="btn-preview" aria-label="Preview ${escapeHtml(sample.name)}">
-          ▶ Preview
-        </button>
-        <!--
-          FUTURE: Load to Track button
-          <button class="btn-ghost btn-sm btn-load" disabled>Load</button>
-        -->
-      </div>
-    `;
-
-    // ── Wire up the Preview button ─────────────────────────
-    const previewBtn = card.querySelector('.btn-preview');
-
-    previewBtn.addEventListener('click', () => {
-      const nowPlaying = SamplePlayer.nowPlaying();
-
-      if (nowPlaying?.id === sample.id) {
-        // Same card — acts as Stop
-        SamplePlayer.stop();
-      } else {
-        // Start this sample (player will stop the previous one)
-        SamplePlayer.preview(sample);
-      }
-    });
-
-    return card;
-  },
-
+// ── Active playback state ─────────────────────────────────────
+// Only one sample may play at a time.
+const active = {
+  sample:      null,   // the Sample object currently playing
+  sourceNode:  null,   // AudioBufferSourceNode
+  startedAt:   0,      // ctx.currentTime when playback started
+  offset:      0,      // seconds into the buffer when started
+  rafId:       null,   // requestAnimationFrame handle for progress
 };
 
-// ── Helpers 
-───────────────────────────────────────────────────
+// ── Callbacks ─────────────────────────────────────────────────
+// External modules register these via SamplePlayer.on(event, fn).
+const listeners = {
+  play:     [],  // (sample) → void
+  stop:     [],  // (sample) → void
+  progress: [],  // (sample, currentTime, duration) → void
+  loaded:   [],  // (sample) → void
+  error:    [],  // (sample, error) → void
+};
 
-/** Returns a suitable emoji for a given audio extension. */
-function extIcon(ext) {
-  switch (ext) {
-    case 'wav':  return '🔷';
-    case 'mp3':  return '🎵';
-    case 'ogg':  return '🔶';
-    case 'flac': return '💎';
-    case 'aiff': return '🎙️';
-    default:     return '🎧';
+function emit(event, ...args) {
+  for (const fn of listeners[event] ?? []) fn(...args);
+}
+
+// ── Progress loop ─────────────────────────────────────────────
+function startProgressLoop(sample) {
+  cancelProgressLoop();
+
+  function tick() {
+    if (!active.sourceNode || active.sample !== sample) return;
+    const elapsed  = getContext().currentTime - active.startedAt + active.offset;
+    const duration = sample.duration ?? 1;
+    const current  = clamp(elapsed, 0, duration);
+    emit('progress', sample, current, duration);
+    if (current < duration) {
+      active.rafId = requestAnimationFrame(tick);
+    }
+  }
+
+  active.rafId = requestAnimationFrame(tick);
+}
+
+function cancelProgressLoop() {
+  if (active.rafId != null) {
+    cancelAnimationFrame(active.rafId);
+    active.rafId = null;
   }
 }
 
-/** Minimal HTML escape to prevent XSS from filenames. */
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+// ── Core API ──────────────────────────────────────────────────
 
-export default SampleBrowser;
+const SamplePlayer = {
 
-/**
- * @typedef {Object} Sample
- * @property {string}                    id
- * @property {string}                    name
- * @property {string}                    filename
- * @property {string}                    ext
- * @property {FileSystemFileHandle}      handle
- * @property {number|null}               duration
- * @property {boolean}                   playing
- * @property {boolean}                   loaded
- * @property {AudioBuffer|null}          buffer
- * @property {string|null}               category
- * @property {boolean}                   favorite
- * @property {number|null}               assignedTrack
- * @property {Float32Array|null}         waveform
- * @property {string[]}                  tags
- */
+  /**
+   * Register a listener for a player event.
+   * @param {'play'|'stop'|'progress'|'loaded'|'error'} event
+   * @param {Function} fn
+   */
+  on(event, fn) {
+    if (listeners[event]) listeners[event].push(fn);
+    return this; // chainable
+  },
+
+  /**
+   * Preview a sample.
+   *
+   * Flow:
+   *   1. Stop any currently playing sample.
+   *   2. If the sample's buffer is already decoded, play it immediately.
+   *   3. Otherwise, read the FileSystemFileHandle, decode the audio,
+   *      cache the buffer on the sample object, then play.
+   *
+   * @param {import('./sample-browser.js').Sample} sample
+   */
+  async preview(sample) {
+    // Stop whatever is playing first
+    this.stop();
+
+    const audioCtx = getContext();
+
+    try {
+      // ── Lazy decode ────────────────────────────────────────
+      if (!sample.buffer) {
+        sample.loaded = false;
+        emit('loaded', sample); // triggers loading state in card
+
+        const file       = await sample.handle.getFile();
+        const arrayBuf   = await file.arrayBuffer();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
+
+        // Cache decoded buffer on the sample object
+        sample.buffer   = audioBuffer;
+        sample.duration = audioBuffer.duration;
+        sample.loaded   = true;
+
+        emit('loaded', sample);
+
+        // FUTURE HOOK: waveform generation
+        // sample.waveform = await generateWaveform(audioBuffer);
+
+        // It's possible the user pressed stop while we were loading
+        if (active.sample !== null && active.sample !== sample) return;
+      }
+
+      // ── Create & connect source ────────────────────────────
+      const source = audioCtx.createBufferSource();
+      source.buffer = sample.buffer;
+      source.connect(audioCtx.destination);
+
+      // FUTURE HOOK: route through gain/effects nodes here
+      // source.connect(effectsChain.input);
+
+      source.start(0);
+
+      // Track active state
+      active.sample     = sample;
+      active.sourceNode = source;
+      active.startedAt  = audioCtx.currentTime;
+      active.offset     = 0;
+      sample.playing    = true;
+
+      emit('play', sample);
+      startProgressLoop(sample);
+
+      // Auto-stop when buffer ends naturally
+      source.onended = () => {
+        // Only clean up if this source is still the active one
+        if (active.sourceNode === source) {
+          this._cleanup(sample);
+          emit('stop', sample);
+        }
+      };
+
+    } catch (err) {
+      console.error('[SamplePlayer] Preview error:', err);
+      sample.loaded  = false;
+      sample.playing = false;
+      emit('error', sample, err);
+    }
+  },
+
+  /**
+   * Stop any currently playing sample immediately.
+   */
+  stop() {
+    if (!active.sourceNode) return;
+
+    const stoppedSample = active.sample;
+
+    try {
+      active.sourceNode.onended = null; // prevent auto-stop callback
+      active.sourceNode.stop();
+    } catch (_) {
+      // Already stopped — safe to ignore
+    }
+
+    this._cleanup(stoppedSample);
+    emit('stop', stoppedSample);
+  },
+
+  /**
+   * Internal cleanup — resets active state and releases the source node.
+   * The AudioBuffer stays cached on the sample object for instant re-play.
+   * @param {object} sample
+   */
+  _cleanup(sample) {
+    cancelProgressLoop();
+    if (sample) sample.playing = false;
+
+    // Disconnect the source to release it from the graph
+    try { active.sourceNode?.disconnect(); } catch (_) {}
+
+    active.sample     = null;
+    active.sourceNode = null;
+    active.startedAt  = 0;
+    active.offset     = 0;
+  },
+
+  /**
+   * Returns the sample currently being previewed, or null.
+   * @returns {object|null}
+   */
+  nowPlaying() {
+    return active.sample;
+  },
+
+  /**
+   * FUTURE: generateWaveform(audioBuffer) → Float32Array
+   * Extracts peak amplitude data for a waveform thumbnail.
+   * Stubbed here — will be implemented in waveform module.
+   */
+  // generateWaveform(buffer, points = 200) { ... }
+
+  /**
+   * FUTURE: loadToTrack(sample, trackIndex)
+   * Routes a sample's buffer to a channel rack track slot.
+   */
+  // loadToTrack(sample, trackIndex) { ... }
+
+};
+
+export default SamplePlayer;
+
 
