@@ -226,25 +226,24 @@ h2{font-size:clamp(.75rem,2.5vw,.9rem);font-weight:300;letter-spacing:10px;color
 .pad[data-cat="FX"] .pad-accent{background:#14b8a6;}
 
 /* ── Song view ── */
-.song-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;border-bottom:1px solid var(--bdr);margin-bottom:14px;}
-.song-title-label{font-size:.6rem;font-weight:700;letter-spacing:3px;color:var(--p-hi);text-transform:uppercase;}
-.song-empty{text-align:center;padding:48px 24px;color:var(--tx3);font-size:.8rem;line-height:1.9;}
-.song-empty strong{color:var(--tx2);}
-.song-strip{display:flex;flex-direction:column;gap:8px;padding-bottom:48px;}
-.song-block{display:flex;align-items:center;gap:10px;background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:11px 12px;position:relative;overflow:hidden;transition:border-color var(--fast);}
-.song-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--p-mid);border-radius:2px 0 0 2px;}
-.song-block.is-playing{border-color:var(--p-hi);box-shadow:var(--glow-sm);}
-.song-block.is-playing::before{background:var(--p-hi);box-shadow:0 0 12px var(--p-hi);}
-.song-block-order{font-size:.62rem;font-weight:700;color:var(--tx3);min-width:18px;font-variant-numeric:tabular-nums;}
-.song-block-info{flex:1;min-width:0;}
-.song-block-name{font-size:.82rem;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.song-block-meta{font-size:.65rem;color:var(--tx3);margin-top:2px;}
-.song-block-loop-badge{font-size:.6rem;font-weight:700;color:var(--p-hi);background:var(--p-dim);border-radius:5px;padding:2px 5px;white-space:nowrap;}
-.song-block-actions{display:flex;gap:5px;}
-.sb-btn{width:26px;height:26px;border-radius:5px;border:1px solid var(--bdr);background:transparent;color:var(--tx3);font-size:.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--fast);}
-.sb-btn:hover{border-color:var(--p-mid);color:var(--p-hi);}
-.sb-btn.rm:hover{border-color:var(--red);color:var(--red);}
-.sb-btn:disabled{opacity:.3;cursor:not-allowed;}
+/* ═══ SONG / TRACK SEQUENCER ═══ */
+#page-song{display:flex;flex-direction:column;padding:0;height:calc(100vh - 180px);overflow:hidden;}
+.song-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#050509ee;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.song-hdr-title{font-size:.6rem;font-weight:700;letter-spacing:3px;color:var(--p-hi);text-transform:uppercase;}
+.song-hdr-spacer{flex:1;}
+.song-tool-btn{background:var(--sur);border:1px solid var(--bdr);color:var(--tx2);padding:4px 10px;border-radius:8px;font-size:.68rem;font-weight:600;transition:all var(--fast);}
+.song-tool-btn:hover{border-color:var(--p-mid);color:var(--p-hi);}
+.song-pat-strip{display:flex;gap:5px;padding:6px 12px;background:#0a0a14;border-bottom:1px solid var(--bdr);overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;}
+.song-pat-strip::-webkit-scrollbar{height:3px;}
+.song-pat-strip::-webkit-scrollbar-thumb{background:var(--bdr-glow);}
+.song-pat-chip{background:var(--sur);border:1px solid var(--bdr);color:var(--tx2);border-radius:6px;padding:4px 10px;font-size:.65rem;font-weight:600;white-space:nowrap;cursor:pointer;transition:all var(--fast);}
+.song-pat-chip.is-selected{background:var(--p-dim);border-color:var(--p-hi);color:var(--p-hi);}
+.song-pat-chip:hover:not(.is-selected){border-color:var(--p-mid);}
+.song-timeline{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;}
+.song-timeline::-webkit-scrollbar{width:5px;height:5px;}
+.song-timeline::-webkit-scrollbar-thumb{background:var(--bdr-glow);border-radius:3px;}
+#songCanvas{display:block;cursor:pointer;}
+
 
 /* ── Load modal ── */
 .modal-backdrop{position:fixed;inset:0;background:#000000aa;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:200;animation:fade-in 180ms ease;}
@@ -316,21 +315,25 @@ h2{font-size:clamp(.75rem,2.5vw,.9rem);font-weight:300;letter-spacing:10px;color
 .roll-zoom-btn{background:var(--sur);border:1px solid var(--bdr);color:var(--tx2);width:26px;height:26px;border-radius:6px;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all var(--fast);}
 .roll-zoom-btn:hover{border-color:var(--p-mid);color:var(--p-hi);}
 .roll-zoom-lbl{font-size:.6rem;color:var(--tx3);min-width:32px;text-align:center;}
-.roll-body{display:flex;flex:1;overflow:hidden;border:1px solid var(--bdr);border-radius:var(--r-card);margin-top:8px;}
-.roll-keys-col{width:42px;flex-shrink:0;overflow:hidden;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:relative;}
-.roll-keys-inner{position:absolute;left:0;right:0;top:0;}
-.roll-key-row{height:14px;border-bottom:1px solid #1e1e3230;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:.44rem;color:var(--tx3);flex-shrink:0;}
-.roll-key-row.is-black{background:#10101a;}
-.roll-key-row.is-c{color:var(--p-hi);border-bottom:1px solid var(--p-dim)!important;font-weight:700;font-size:.48rem;}
-.roll-key-row.is-white:hover,.roll-key-row.is-black:hover{background:var(--p-dim);cursor:pointer;}
+/* KEY FIX: roll-body uses overflow:hidden so only the canvas area scrolls */
+.roll-body{display:flex;flex:1;overflow:hidden;border:1px solid var(--bdr);border-radius:var(--r-card);margin-top:8px;min-height:0;}
+/* KEY FIX: keys column clips to the row height, scroll driven by JS */
+.roll-keys-col{width:46px;flex-shrink:0;overflow:hidden;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:relative;}
+.roll-keys-inner{position:absolute;left:0;right:0;top:0;will-change:transform;}
+.roll-key-row{height:14px;border-bottom:1px solid #1e1e3218;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:.44rem;color:var(--tx3);flex-shrink:0;user-select:none;}
+.roll-key-row.is-black{background:#0d0d1a;}
+.roll-key-row.is-white{background:var(--sur);}
+.roll-key-row.is-c{color:var(--p-hi);border-bottom:1px solid #3b2d6e60!important;font-weight:700;font-size:.5rem;}
+.roll-key-row:hover{background:var(--p-dim)!important;cursor:pointer;}
+/* KEY FIX: canvas area scrolls both axes, keys column syncs via scroll event */
 .roll-canvas-area{flex:1;overflow:auto;position:relative;background:#080810;-webkit-overflow-scrolling:touch;}
-.roll-canvas-area::-webkit-scrollbar{width:4px;height:4px;}
-.roll-canvas-area::-webkit-scrollbar-track{background:var(--sur2);}
-.roll-canvas-area::-webkit-scrollbar-thumb{background:var(--bdr-glow);border-radius:2px;}
-#rollCanvas{display:block;cursor:crosshair;}
+.roll-canvas-area::-webkit-scrollbar{width:5px;height:5px;}
+.roll-canvas-area::-webkit-scrollbar-track{background:#0a0a14;}
+.roll-canvas-area::-webkit-scrollbar-thumb{background:var(--bdr-glow);border-radius:3px;}
+#rollCanvas{display:block;cursor:crosshair;image-rendering:pixelated;}
 .roll-playhead-line{position:absolute;top:0;width:2px;background:var(--p-hi);opacity:.9;pointer-events:none;box-shadow:0 0 6px var(--p-hi);}
-.roll-velocity-row{height:64px;flex-shrink:0;border-top:1px solid var(--bdr);display:flex;background:var(--sur2);}
-.vel-label-col{width:42px;background:var(--sur);border-right:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.52rem;color:var(--tx3);letter-spacing:1px;writing-mode:vertical-rl;flex-shrink:0;}
+.roll-velocity-row{height:68px;flex-shrink:0;border-top:1px solid var(--bdr);display:flex;background:#080810;}
+.vel-label-col{width:46px;background:var(--sur);border-right:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.48rem;color:var(--tx3);letter-spacing:1px;writing-mode:vertical-rl;flex-shrink:0;}
 #velCanvas{flex:1;display:block;cursor:ns-resize;}
 
 /* ═══ MIXER ═══ */
@@ -417,6 +420,13 @@ h2{font-size:clamp(.75rem,2.5vw,.9rem);font-weight:300;letter-spacing:10px;color
     <section class="landing" id="landingSection">
       <button class="btn-primary" id="folderButton">📂 Choose Sample Folder</button>
       <p class="status" id="statusText">No folder selected.</p>
+      <p style="font-size:.68rem;color:var(--tx3);text-align:center;max-width:280px;line-height:1.6;">
+        Tip: Select multiple audio files at once using the file picker below if folder access isn't available.
+      </p>
+      <button class="btn-ghost" id="filePickerBtn" style="font-size:.75rem;">🎵 Pick Individual Files</button>
+      <!-- Hidden inputs — one for folder, one for individual files -->
+      <input type="file" id="folderInput" webkitdirectory multiple accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" style="display:none"/>
+      <input type="file" id="fileInput" multiple accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff" style="display:none"/>
     </section>
     <section class="browser" id="browserSection" hidden>
       <div class="browser-toolbar">
@@ -468,17 +478,23 @@ h2{font-size:clamp(.75rem,2.5vw,.9rem);font-weight:300;letter-spacing:10px;color
     <div class="pads-grid" id="padsGrid"></div>
   </section>
 
-  <!-- SONG -->
+  <!-- SONG / TRACK SEQUENCER -->
   <section class="page" id="page-song" hidden>
-    <div class="song-toolbar">
-      <span class="song-title-label">SONG ARRANGEMENT</span>
-      <button class="btn-ghost btn-sm" id="clearSong">Clear</button>
+    <!-- Header toolbar -->
+    <div class="song-hdr">
+      <span class="song-hdr-title">SONG</span>
+      <button class="song-tool-btn" id="songAddTrackBtn">+ Track</button>
+      <div class="song-hdr-spacer"></div>
+      <button class="song-tool-btn" id="songZoomOut">−</button>
+      <span style="font-size:.6rem;color:var(--tx3);min-width:28px;text-align:center;" id="songZoomLbl">1×</span>
+      <button class="song-tool-btn" id="songZoomIn">+</button>
+      <button class="song-tool-btn" id="clearSong" style="color:var(--red);border-color:var(--red);">Clear</button>
     </div>
-    <div class="song-strip" id="songStrip">
-      <div class="song-empty" id="songEmpty">
-        <p>No patterns added yet.</p>
-        <p>Go to <strong>Channel Rack</strong> → tap <strong>→ Song</strong></p>
-      </div>
+    <!-- Pattern picker — select which pattern to place -->
+    <div class="song-pat-strip" id="songPatStrip"></div>
+    <!-- Canvas timeline -->
+    <div class="song-timeline" id="songTimeline">
+      <canvas id="songCanvas"></canvas>
     </div>
   </section>
 
@@ -681,7 +697,11 @@ const LibraryDB = (() => {
   }
   function tx(mode='readonly'){return db.transaction(STORE,mode).objectStore(STORE);}
   function p(r){return new Promise((res,rej)=>{r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
-  async function saveFolder(name,handle){await open();return p(tx('readwrite').add({name,handle,addedAt:Date.now()}));}
+  async function saveFolder(name,handle){
+    await open();
+    // Store null handle for file-input folders (no persistence possible)
+    return p(tx('readwrite').add({name,handle:handle||null,addedAt:Date.now()}));
+  }
   async function getFolders(){await open();return p(tx().getAll());}
   async function deleteFolder(id){await open();return p(tx('readwrite').delete(id));}
   async function verifyPermission(handle){
@@ -812,52 +832,612 @@ document.getElementById('patLoop').addEventListener('dblclick',()=>{
 document.getElementById('patName').addEventListener('change',e=>{
   activePat().name=e.target.value||`Pattern ${activePatIdx+1}`;
 });
-document.getElementById('patSend').addEventListener('click',()=>{
-  const p=activePat();
-  songArrangement.push({patternIdx:activePatIdx,name:p.name,loop:p.loop,loopCount:p.loopCount});
-  renderSong(); showToast(`✓ ${p.name} → Song`);
-});
+/* ════════════════════════════════════════════════════════════
+   SONG / TRACK SEQUENCER  —  canvas-based timeline
+════════════════════════════════════════════════════════════ */
 
-/* ── Song view ───────────────────────────────────────────────── */
-function renderSong(){
-  document.querySelectorAll('.song-block').forEach(e=>e.remove());
-  const empty=document.getElementById('songEmpty');
-  empty.hidden=songArrangement.length>0;
-  songArrangement.forEach((block,i)=>{
-    const el=document.createElement('div');
-    el.className='song-block'; el.dataset.si=i;
-    el.innerHTML=`
-      <span class="song-block-order">${i+1}</span>
-      <div class="song-block-info">
-        <div class="song-block-name">${block.name}</div>
-        <div class="song-block-meta">${globalSteps} steps${block.loop?` · loops ×${block.loopCount}`:'· plays once'}</div>
-      </div>
-      ${block.loop?`<span class="song-block-loop-badge">↺ ×${block.loopCount}</span>`:''}
-      <div class="song-block-actions">
-        <button class="sb-btn up" title="Move up"${i===0?' disabled':''}>↑</button>
-        <button class="sb-btn dn" title="Move down"${i===songArrangement.length-1?' disabled':''}>↓</button>
-        <button class="sb-btn rm" title="Remove">✕</button>
-      </div>`;
-    el.querySelector('.up').addEventListener('click',()=>{
-      if(i===0) return;
-      [songArrangement[i-1],songArrangement[i]]=[songArrangement[i],songArrangement[i-1]];
-      renderSong();
+// Song data model
+// songTracks: persistent lanes (named from loaded samples)
+// songClips:  {trackIdx, patternIdx, bar, lenBars}
+let songTracks = [];   // [{name, color}]
+let songClips  = [];   // [{trackIdx, patternIdx, bar, lenBars}]
+let songSelectedPat = 0;   // which pattern chip is active
+let songZoom = 1;           // bars per "cell"
+let songTool = 'place';     // 'place' | 'erase'
+let songLongPressTimer = null;
+
+// Song canvas constants
+const SONG_TRACK_H  = 44;   // px per track row
+const SONG_LABEL_W  = 80;   // px for track name column
+const SONG_BAR_W    = 56;   // px per bar at zoom 1×
+const SONG_HDR_H    = 24;   // px for bar number header
+const SONG_BARS     = 32;   // total bars in timeline
+
+// Track colors cycle
+const SONG_TRACK_COLORS = ['#a855f7','#06b6d4','#f97316','#22c55e','#eab308','#ef4444','#ec4899','#8b5cf6'];
+
+function ensureSongTracks() {
+  // Auto-create tracks from loaded samples
+  tracks.forEach((t, i) => {
+    if (t.name && !songTracks.find(st => st.sampleIdx === i)) {
+      songTracks.push({
+        name: t.label,
+        sampleIdx: i,
+        color: SONG_TRACK_COLORS[songTracks.length % SONG_TRACK_COLORS.length]
+      });
+    }
+  });
+  // Ensure at least 4 tracks exist
+  while (songTracks.length < 4) {
+    songTracks.push({
+      name: `Track ${songTracks.length + 1}`,
+      sampleIdx: -1,
+      color: SONG_TRACK_COLORS[songTracks.length % SONG_TRACK_COLORS.length]
     });
-    el.querySelector('.dn').addEventListener('click',()=>{
-      if(i===songArrangement.length-1) return;
-      [songArrangement[i+1],songArrangement[i]]=[songArrangement[i],songArrangement[i+1]];
-      renderSong();
+  }
+}
+
+function renderSongPatStrip() {
+  const strip = document.getElementById('songPatStrip');
+  strip.innerHTML = '';
+  patterns.forEach((p, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'song-pat-chip' + (i === songSelectedPat ? ' is-selected' : '');
+    chip.textContent = p.name;
+    chip.addEventListener('click', () => {
+      songSelectedPat = i;
+      renderSongPatStrip();
     });
-    el.querySelector('.rm').addEventListener('click',()=>{
-      songArrangement.splice(i,1); renderSong(); showToast('Removed from Song');
-    });
-    document.getElementById('songStrip').appendChild(el);
+    strip.appendChild(chip);
   });
 }
-document.getElementById('clearSong').addEventListener('click',()=>{
-  if(!songArrangement.length) return;
-  songArrangement=[]; renderSong(); showToast('Song cleared');
+
+function renderSongCanvas() {
+  const canvas = document.getElementById('songCanvas');
+  const timeline = document.getElementById('songTimeline');
+  const bw = SONG_BAR_W * songZoom;
+  const W = SONG_LABEL_W + SONG_BARS * bw;
+  const H = SONG_HDR_H + songTracks.length * SONG_TRACK_H + SONG_TRACK_H; // extra for add row
+
+  canvas.width  = W;
+  canvas.height = H;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+
+  // Bar header
+  ctx.fillStyle = '#0e0e1a';
+  ctx.fillRect(SONG_LABEL_W, 0, W - SONG_LABEL_W, SONG_HDR_H);
+  ctx.strokeStyle = '#1e1e32';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, SONG_HDR_H); ctx.lineTo(W, SONG_HDR_H); ctx.stroke();
+
+  // Bar numbers
+  ctx.fillStyle = '#555570';
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'center';
+  for (let b = 0; b < SONG_BARS; b++) {
+    const x = SONG_LABEL_W + b * bw + bw / 2;
+    ctx.fillText(b + 1, x, 15);
+    // Bar line
+    ctx.strokeStyle = b % 4 === 0 ? '#2a2a42' : '#1a1a28';
+    ctx.lineWidth = b % 4 === 0 ? 1.5 : 0.8;
+    ctx.beginPath();
+    ctx.moveTo(SONG_LABEL_W + b * bw, SONG_HDR_H);
+    ctx.lineTo(SONG_LABEL_W + b * bw, H);
+    ctx.stroke();
+  }
+
+  // Track rows
+  songTracks.forEach((track, ti) => {
+    const y = SONG_HDR_H + ti * SONG_TRACK_H;
+
+    // Track label background
+    ctx.fillStyle = '#0d0d1a';
+    ctx.fillRect(0, y, SONG_LABEL_W, SONG_TRACK_H);
+
+    // Color accent on left of label
+    ctx.fillStyle = track.color;
+    ctx.fillRect(0, y + 4, 3, SONG_TRACK_H - 8);
+
+    // Track name
+    ctx.fillStyle = '#9898b0';
+    ctx.font = 'bold 9px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(track.name.slice(0, 9), 8, y + SONG_TRACK_H / 2 + 3);
+
+    // Row background (alternating)
+    ctx.fillStyle = ti % 2 === 0 ? '#090912' : '#0b0b16';
+    ctx.fillRect(SONG_LABEL_W, y, W - SONG_LABEL_W, SONG_TRACK_H);
+
+    // Row separator
+    ctx.strokeStyle = '#1a1a28';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, y + SONG_TRACK_H);
+    ctx.lineTo(W, y + SONG_TRACK_H);
+    ctx.stroke();
+  });
+
+  // Draw clips
+  songClips.forEach(clip => {
+    const track = songTracks[clip.trackIdx];
+    if (!track) return;
+    const x = SONG_LABEL_W + clip.bar * bw;
+    const y = SONG_HDR_H + clip.trackIdx * SONG_TRACK_H;
+    const w = clip.lenBars * bw - 2;
+    const h = SONG_TRACK_H - 4;
+    const pat = patterns[clip.patternIdx];
+    const col = track.color;
+
+    // Clip body
+    ctx.fillStyle = col + '30';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x + 1, y + 2, w, h, 4);
+    else ctx.rect(x + 1, y + 2, w, h);
+    ctx.fill();
+
+    // Clip border
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Clip name
+    ctx.fillStyle = col;
+    ctx.font = 'bold 8px system-ui';
+    ctx.textAlign = 'left';
+    if (w > 20) ctx.fillText((pat?.name || 'Pattern').slice(0, Math.floor(w / 6)), x + 4, y + SONG_TRACK_H / 2 + 3);
+
+    // Mini step preview inside clip (if wide enough)
+    if (w > 40 && pat) {
+      const stepW = Math.min(bw / globalSteps, 4);
+      for (let s = 0; s < globalSteps; s++) {
+        const hasNote = pat.steps.some(row => row[s]);
+        if (hasNote) {
+          ctx.fillStyle = col + 'cc';
+          ctx.fillRect(x + 2 + s * stepW, y + h - 5, Math.max(stepW - 1, 1), 3);
+        }
+      }
+    }
+  });
+
+  // "Add track" row hint
+  const addY = SONG_HDR_H + songTracks.length * SONG_TRACK_H;
+  ctx.fillStyle = '#0a0a14';
+  ctx.fillRect(0, addY, W, SONG_TRACK_H);
+  ctx.fillStyle = '#2a2a42';
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('+ Add Track', SONG_LABEL_W / 2, addY + SONG_TRACK_H / 2 + 3);
+
+  // Song playhead
+  if (AudioEngine.isRunning) {
+    const phX = SONG_LABEL_W + songPlayBar * bw;
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#a855f7';
+    ctx.shadowBlur = 6;
+    ctx.beginPath(); ctx.moveTo(phX, SONG_HDR_H); ctx.lineTo(phX, H); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+}
+
+// Hit test — what did user tap on canvas?
+function songHitTest(x, y) {
+  const bw = SONG_BAR_W * songZoom;
+  // Header row — ignore
+  if (y < SONG_HDR_H) return null;
+  const trackIdx = Math.floor((y - SONG_HDR_H) / SONG_TRACK_H);
+  const bar = Math.floor((x - SONG_LABEL_W) / bw);
+  // Add track row
+  if (trackIdx >= songTracks.length) return { type: 'addTrack' };
+  // Label column
+  if (x < SONG_LABEL_W) return { type: 'label', trackIdx };
+  if (bar < 0 || bar >= SONG_BARS) return null;
+  // Find existing clip
+  const clipIdx = songClips.findIndex(c => c.trackIdx === trackIdx && bar >= c.bar && bar < c.bar + c.lenBars);
+  if (clipIdx >= 0) return { type: 'clip', clipIdx, trackIdx, bar };
+  return { type: 'empty', trackIdx, bar };
+}
+
+// Long press for erase / context
+let songPressX = 0, songPressY = 0;
+
+document.getElementById('songCanvas').addEventListener('pointerdown', e => {
+  const canvas = document.getElementById('songCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / rect.width;
+  const sy = canvas.height / rect.height;
+  songPressX = (e.clientX - rect.left) * sx;
+  songPressY = (e.clientY - rect.top) * sy;
+
+  // Long press = erase
+  songLongPressTimer = setTimeout(() => {
+    const hit = songHitTest(songPressX, songPressY);
+    if (hit?.type === 'clip') {
+      songClips.splice(hit.clipIdx, 1);
+      renderSongCanvas();
+      showToast('Clip removed');
+    }
+    songLongPressTimer = null;
+  }, 500);
 });
+
+document.getElementById('songCanvas').addEventListener('pointerup', e => {
+  if (!songLongPressTimer) return; // was a long press, already handled
+  clearTimeout(songLongPressTimer);
+  songLongPressTimer = null;
+
+  const canvas = document.getElementById('songCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / rect.width;
+  const sy = canvas.height / rect.height;
+  const x = (e.clientX - rect.left) * sx;
+  const y = (e.clientY - rect.top) * sy;
+  const hit = songHitTest(x, y);
+  if (!hit) return;
+
+  if (hit.type === 'addTrack') {
+    songTracks.push({
+      name: `Track ${songTracks.length + 1}`,
+      sampleIdx: -1,
+      color: SONG_TRACK_COLORS[songTracks.length % SONG_TRACK_COLORS.length]
+    });
+    renderSongCanvas(); return;
+  }
+
+  if (hit.type === 'empty') {
+    // Place selected pattern as a 1-bar clip
+    songClips.push({
+      trackIdx: hit.trackIdx,
+      patternIdx: songSelectedPat,
+      bar: hit.bar,
+      lenBars: 1
+    });
+    renderSongCanvas();
+    showToast(`${patterns[songSelectedPat]?.name} → bar ${hit.bar + 1}`);
+    return;
+  }
+
+  if (hit.type === 'clip') {
+    // Tap existing clip to remove
+    songClips.splice(hit.clipIdx, 1);
+    renderSongCanvas();
+    return;
+  }
+});
+
+document.getElementById('songCanvas').addEventListener('pointermove', e => {
+  if (songLongPressTimer) {
+    // Moved — cancel long press
+    clearTimeout(songLongPressTimer);
+    songLongPressTimer = null;
+  }
+});
+
+// Song zoom
+let songZoomVal = 1;
+document.getElementById('songZoomIn').addEventListener('click', () => {
+  songZoomVal = Math.min(songZoomVal * 1.5, 4);
+  songZoom = songZoomVal;
+  document.getElementById('songZoomLbl').textContent = songZoomVal.toFixed(1) + '×';
+  renderSongCanvas();
+});
+document.getElementById('songZoomOut').addEventListener('click', () => {
+  songZoomVal = Math.max(songZoomVal / 1.5, 0.4);
+  songZoom = songZoomVal;
+  document.getElementById('songZoomLbl').textContent = songZoomVal.toFixed(1) + '×';
+  renderSongCanvas();
+});
+
+document.getElementById('songAddTrackBtn').addEventListener('click', () => {
+  songTracks.push({
+    name: `Track ${songTracks.length + 1}`,
+    sampleIdx: -1,
+    color: SONG_TRACK_COLORS[songTracks.length % SONG_TRACK_COLORS.length]
+  });
+  renderSongCanvas();
+});
+
+document.getElementById('clearSong').addEventListener('click', () => {
+  if (!songClips.length && songTracks.length <= 4) return;
+  songClips = [];
+  renderSongCanvas();
+  showToast('Song cleared');
+});
+
+// Song playhead bar tracking
+let songPlayBar = 0;
+
+function initSong() {
+  ensureSongTracks();
+  renderSongPatStrip();
+  renderSongCanvas();
+}
+
+/* ════════════════════════════════════════════════════════════
+   PIANO ROLL — rebuilt with proper scroll sync
+════════════════════════════════════════════════════════════ */
+
+const ROLL_NOTE_HEIGHT = 14;
+const ROLL_TOTAL_NOTES = 88;
+const ROLL_BEAT_PX     = 80;
+const SNAP_VALUES      = [1, 0.5, 0.25, 0.125];
+const SNAP_LABELS      = ['1/4','1/8','1/16','1/32'];
+
+let rollNotes     = [];
+let rollTool      = 'draw';
+let rollZoom      = 1;
+let rollSnapIdx   = 2;
+let rollTrackIdx  = 0;
+let rollDrag      = null;
+
+function noteNumToName(n) {
+  const midi = n + 21;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[midi % 12] + (Math.floor(midi / 12) - 1);
+}
+function noteIsBlack(n) { return [1,3,6,8,10].includes((n + 21) % 12); }
+function noteIsC(n)     { return (n + 21) % 12 === 0; }
+
+function buildRollKeys() {
+  const inner = document.getElementById('rollKeysInner');
+  inner.innerHTML = '';
+  for (let i = ROLL_TOTAL_NOTES - 1; i >= 0; i--) {
+    const name = noteNumToName(i);
+    const isBlack = noteIsBlack(i);
+    const isC = noteIsC(i);
+    const div = document.createElement('div');
+    div.className = `roll-key-row ${isBlack ? 'is-black' : 'is-white'}${isC ? ' is-c' : ''}`;
+    div.style.height = ROLL_NOTE_HEIGHT + 'px';
+    div.textContent = isC ? name : (!isBlack ? name : '');
+    div.addEventListener('pointerdown', e => { e.preventDefault(); previewRollNote(i); });
+    inner.appendChild(div);
+  }
+  inner.style.height = (ROLL_TOTAL_NOTES * ROLL_NOTE_HEIGHT) + 'px';
+}
+
+function previewRollNote(noteIdx) {
+  const track = tracks[rollTrackIdx];
+  if (!track?.buffer) return;
+  try {
+    const ctx = AudioEngine.getAudioContext();
+    const src = ctx.createBufferSource();
+    src.buffer = track.buffer;
+    src.playbackRate.value = Math.pow(2, ((noteIdx + 21) - 60) / 12);
+    const g = ctx.createGain(); g.gain.value = 0.7;
+    src.connect(g).connect(ctx.destination);
+    src.start();
+    setTimeout(() => { try { src.stop(); } catch {} }, 350);
+  } catch {}
+}
+
+function renderRollCanvas() {
+  const area   = document.getElementById('rollCanvasArea');
+  const canvas = document.getElementById('rollCanvas');
+  const beatPx = ROLL_BEAT_PX * rollZoom;
+  const beats  = Math.max(globalSteps * 2, 32);
+  const W      = Math.ceil(beats * beatPx);
+  const H      = ROLL_TOTAL_NOTES * ROLL_NOTE_HEIGHT;
+  canvas.width = W; canvas.height = H;
+
+  const ctx = canvas.getContext('2d');
+  // Row backgrounds
+  for (let n = 0; n < ROLL_TOTAL_NOTES; n++) {
+    const y = (ROLL_TOTAL_NOTES - 1 - n) * ROLL_NOTE_HEIGHT;
+    ctx.fillStyle = noteIsBlack(n) ? '#0c0c18' : '#0f0f1c';
+    ctx.fillRect(0, y, W, ROLL_NOTE_HEIGHT);
+    if (noteIsC(n)) {
+      ctx.strokeStyle = '#3b2d6e40'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+  }
+  // Beat grid
+  for (let b = 0; b <= beats; b++) {
+    const x = b * beatPx;
+    ctx.strokeStyle = b % 4 === 0 ? '#2a2a4260' : '#1a1a3020';
+    ctx.lineWidth   = b % 4 === 0 ? 1.5 : 0.8;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  // Snap grid
+  const sv = SNAP_VALUES[rollSnapIdx];
+  for (let s = 0; s * sv < beats; s++) {
+    const x = s * sv * beatPx;
+    if (Math.abs((x % beatPx)) < 1) continue;
+    ctx.strokeStyle = '#18182818'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  // Notes
+  rollNotes.filter(n => n.track === rollTrackIdx).forEach(note => {
+    const x = note.start * beatPx;
+    const y = (ROLL_TOTAL_NOTES - 1 - note.note) * ROLL_NOTE_HEIGHT;
+    const w = Math.max(note.dur * beatPx - 2, 4);
+    const h = ROLL_NOTE_HEIGHT - 1;
+    const g = ctx.createLinearGradient(x, y, x, y + h);
+    g.addColorStop(0, '#c084fc'); g.addColorStop(1, '#7c3aed');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x + 1, y + 1, w, h - 1, 3);
+    else ctx.rect(x + 1, y + 1, w, h - 1);
+    ctx.fill();
+    ctx.strokeStyle = '#e879f9'; ctx.lineWidth = 0.8; ctx.stroke();
+    // Resize handle
+    ctx.fillStyle = '#fff5';
+    ctx.fillRect(x + w - 3, y + 2, 3, h - 4);
+  });
+}
+
+function renderVelCanvas() {
+  const canvas  = document.getElementById('velCanvas');
+  const area    = document.getElementById('rollCanvasArea');
+  const beatPx  = ROLL_BEAT_PX * rollZoom;
+  const W       = area.clientWidth  || 300;
+  canvas.width  = W; canvas.height = 68;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#080810'; ctx.fillRect(0, 0, W, 68);
+  const scrollX = area.scrollLeft;
+  rollNotes.filter(n => n.track === rollTrackIdx).forEach(note => {
+    const x = note.start * beatPx - scrollX;
+    if (x < -10 || x > W + 10) return;
+    const bh = Math.max(4, Math.round(note.vel * 58));
+    const g = ctx.createLinearGradient(0, 68 - bh, 0, 68);
+    g.addColorStop(0, '#a855f7'); g.addColorStop(1, '#5b21b6');
+    ctx.fillStyle = g;
+    ctx.fillRect(x + 1, 68 - bh, 7, bh);
+    ctx.fillStyle = '#c084fc';
+    ctx.fillRect(x + 1, 68 - bh, 7, 2);
+  });
+}
+
+function snapBeat(b) { const s = SNAP_VALUES[rollSnapIdx]; return Math.round(b / s) * s; }
+function xToBeat(x)  { return x / (ROLL_BEAT_PX * rollZoom); }
+function yToNote(y)  { return ROLL_TOTAL_NOTES - 1 - Math.floor(y / ROLL_NOTE_HEIGHT); }
+
+function findNote(beat, note) {
+  return rollNotes.find(n => n.track === rollTrackIdx && n.note === note && beat >= n.start && beat < n.start + n.dur);
+}
+function nearResizeEdge(beat, note) {
+  const thr = 2 / (ROLL_BEAT_PX * rollZoom);
+  return rollNotes.find(n => n.track === rollTrackIdx && n.note === note && Math.abs(beat - (n.start + n.dur)) < thr);
+}
+
+const rollCanvas = document.getElementById('rollCanvas');
+
+rollCanvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  rollCanvas.setPointerCapture(e.pointerId);
+  const rect = rollCanvas.getBoundingClientRect();
+  const sx = rollCanvas.width / rect.width;
+  const sy = rollCanvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * sx;
+  const cy = (e.clientY - rect.top)  * sy;
+  const beat = xToBeat(cx);
+  const note = yToNote(cy);
+
+  if (rollTool === 'erase') {
+    const found = findNote(beat, note);
+    if (found) { rollNotes.splice(rollNotes.indexOf(found), 1); renderRollCanvas(); renderVelCanvas(); }
+    return;
+  }
+  if (rollTool === 'draw') {
+    const resize = nearResizeEdge(beat, note);
+    if (resize) { rollDrag = { type:'resize', note:resize, startX:cx }; return; }
+    const existing = findNote(beat, note);
+    if (existing) { rollDrag = { type:'move', note:existing, startX:cx, startY:cy, origStart:existing.start, origNote:existing.note }; return; }
+    const sn = snapBeat(beat);
+    const nn = { track:rollTrackIdx, note, start:sn, dur:SNAP_VALUES[rollSnapIdx], vel:0.8 };
+    rollNotes.push(nn);
+    rollDrag = { type:'resize', note:nn, startX:cx };
+    previewRollNote(note);
+    renderRollCanvas(); renderVelCanvas();
+  }
+});
+
+rollCanvas.addEventListener('pointermove', e => {
+  if (!rollDrag) return;
+  const rect = rollCanvas.getBoundingClientRect();
+  const sx = rollCanvas.width / rect.width;
+  const sy = rollCanvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * sx;
+  const cy = (e.clientY - rect.top)  * sy;
+  if (rollDrag.type === 'resize') {
+    rollDrag.note.dur = Math.max(SNAP_VALUES[rollSnapIdx], snapBeat(xToBeat(cx) - rollDrag.note.start));
+    renderRollCanvas();
+  } else if (rollDrag.type === 'move') {
+    const dBeat = xToBeat(cx - rollDrag.startX);
+    const dNote = -Math.round((cy - rollDrag.startY) / ROLL_NOTE_HEIGHT);
+    rollDrag.note.start = Math.max(0, snapBeat(rollDrag.origStart + dBeat));
+    rollDrag.note.note  = Math.max(0, Math.min(ROLL_TOTAL_NOTES - 1, rollDrag.origNote + dNote));
+    renderRollCanvas();
+  }
+});
+rollCanvas.addEventListener('pointerup', () => { rollDrag = null; });
+
+// Velocity canvas drag
+document.getElementById('velCanvas').addEventListener('pointerdown', e => {
+  const canvas = document.getElementById('velCanvas');
+  const area   = document.getElementById('rollCanvasArea');
+  const rect   = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width) + area.scrollLeft;
+  const y = (e.clientY - rect.top)  * (canvas.height / rect.height);
+  const beatPx = ROLL_BEAT_PX * rollZoom;
+  const closest = rollNotes
+    .filter(n => n.track === rollTrackIdx)
+    .reduce((best, n) => {
+      const dist = Math.abs(n.start * beatPx - x);
+      return (!best || dist < best.dist) ? { note:n, dist } : best;
+    }, null);
+  if (closest && closest.dist < 24) {
+    closest.note.vel = Math.max(0.05, Math.min(1, 1 - y / 64));
+    renderVelCanvas();
+  }
+});
+
+// KEY FIX: sync key column scroll with canvas scroll
+document.getElementById('rollCanvasArea').addEventListener('scroll', function() {
+  document.getElementById('rollKeysInner').style.transform = `translateY(-${this.scrollTop}px)`;
+  renderVelCanvas();
+});
+
+// Tool buttons
+document.querySelectorAll('.roll-tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    rollTool = btn.dataset.tool;
+    document.querySelectorAll('.roll-tool-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+    rollCanvas.style.cursor = rollTool === 'erase' ? 'not-allowed' : rollTool === 'select' ? 'default' : 'crosshair';
+  });
+});
+document.getElementById('rollSnapBtn').addEventListener('click', () => {
+  rollSnapIdx = (rollSnapIdx + 1) % SNAP_VALUES.length;
+  document.getElementById('rollSnapBtn').textContent = SNAP_LABELS[rollSnapIdx];
+  renderRollCanvas();
+});
+document.getElementById('rollZoomIn').addEventListener('click', () => {
+  rollZoom = Math.min(rollZoom * 1.5, 8);
+  document.getElementById('rollZoomLbl').textContent = rollZoom.toFixed(1) + '×';
+  renderRollCanvas(); renderVelCanvas();
+});
+document.getElementById('rollZoomOut').addEventListener('click', () => {
+  rollZoom = Math.max(rollZoom / 1.5, 0.25);
+  document.getElementById('rollZoomLbl').textContent = rollZoom.toFixed(1) + '×';
+  renderRollCanvas(); renderVelCanvas();
+});
+
+function buildRollTrackSel() {
+  const sel = document.getElementById('rollTrackSel');
+  sel.innerHTML = '';
+  tracks.forEach((t, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = t.name ? `${t.label}` : `Track ${i+1}`;
+    sel.appendChild(opt);
+  });
+  sel.value = rollTrackIdx;
+}
+document.getElementById('rollTrackSel').addEventListener('change', function() {
+  rollTrackIdx = parseInt(this.value);
+  renderRollCanvas(); renderVelCanvas();
+});
+
+function initRoll() {
+  buildRollKeys();
+  buildRollTrackSel();
+  renderRollCanvas();
+  renderVelCanvas();
+  // KEY FIX: scroll to Middle C (C4 = MIDI 60 = noteIdx 39)
+  setTimeout(() => {
+    const area = document.getElementById('rollCanvasArea');
+    const middleCY = (ROLL_TOTAL_NOTES - 1 - 39) * ROLL_NOTE_HEIGHT;
+    area.scrollTop = Math.max(0, middleCY - (area.clientHeight || 300) / 2);
+    // Sync key column immediately
+    document.getElementById('rollKeysInner').style.transform = `translateY(-${area.scrollTop}px)`;
+  }, 60);
+}
+
 
 /* ── Load modal ──────────────────────────────────────────────── */
 function openModal(name,file,card){
@@ -894,14 +1474,23 @@ document.querySelectorAll('.load-dest-btn').forEach(btn=>{
 });
 
 /* ── Folder management ───────────────────────────────────────── */
+/* ── Folder / file picker — 3-tier fallback ──────────────────
+   Tier 1: showDirectoryPicker  (Chrome 86+, Edge 86+)
+   Tier 2: webkitdirectory      (Firefox, Safari, all mobile)
+   Tier 3: individual files     (universal, no restrictions)
+──────────────────────────────────────────────────────────── */
 async function openFolder(){
-  if(!window.showDirectoryPicker){showToast('⚠ Not supported in this browser');return;}
-  try{
-    const handle=await window.showDirectoryPicker({mode:'read'});
-    await addFolder(handle);
-  }catch(e){if(e.name!=='AbortError') showToast('⚠ Could not read folder');}
+  if(window.showDirectoryPicker){
+    try{
+      const handle=await window.showDirectoryPicker({mode:'read'});
+      await addFolderHandle(handle); return;
+    }catch(e){ if(e.name==='AbortError') return; }
+    // fell through — API exists but blocked, try webkitdirectory
+  }
+  document.getElementById('folderInput').click();
 }
-async function addFolder(handle){
+
+async function addFolderHandle(handle){
   const name=handle.name;
   if(folders.find(f=>f.name===name)){setActiveFolder(folders.find(f=>f.name===name).id);return;}
   const id=await LibraryDB.saveFolder(name,handle);
@@ -909,6 +1498,45 @@ async function addFolder(handle){
   folders.push(fr); await scanFolder(fr); rebuildLib();
   setActiveFolder(id); renderFolderTabs(); showBrowser();
 }
+
+async function addFilesAsFolder(folderName,files){
+  let fr=folders.find(f=>f.name===folderName);
+  if(!fr){
+    let id=Date.now();
+    try{ id=await LibraryDB.saveFolder(folderName,null); }catch{}
+    fr={id,name:folderName,handle:null,samples:[]};
+    folders.push(fr);
+  }
+  files.forEach(file=>{
+    if(!fr.samples.find(s=>s.name===file.name)) fr.samples.push({name:file.name,file});
+  });
+  fr.samples.sort((a,b)=>a.name.localeCompare(b.name));
+  rebuildLib(); setActiveFolder(fr.id); renderFolderTabs(); showBrowser();
+  showToast(`✓ ${files.length} samples from "${folderName}"`);
+}
+
+// Tier 2 — webkitdirectory
+document.getElementById('folderInput').addEventListener('change',async function(){
+  if(!this.files||!this.files.length) return;
+  const files=[...this.files].filter(f=>/\.(wav|mp3|ogg|flac|aiff?)$/i.test(f.name));
+  if(!files.length){showToast('No audio files in that folder');return;}
+  const folderName=files[0].webkitRelativePath?.split('/')[0]||'My Samples';
+  await addFilesAsFolder(folderName,files);
+  this.value='';
+});
+
+// Tier 3 — individual files
+document.getElementById('filePickerBtn').addEventListener('click',()=>{
+  document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change',async function(){
+  if(!this.files||!this.files.length) return;
+  const files=[...this.files].filter(f=>/\.(wav|mp3|ogg|flac|aiff?)$/i.test(f.name));
+  if(!files.length){showToast('No audio files selected');return;}
+  await addFilesAsFolder('My Samples',files);
+  this.value='';
+});
+
 async function scanFolder(fr){
   fr.samples=[];
   for await(const e of fr.handle.values()){
@@ -954,6 +1582,10 @@ function hideBrowser(){document.getElementById('landingSection').hidden=false;do
 async function restoreLibrary(){
   const saved=await LibraryDB.getFolders();
   for(const r of saved){
+    if(!r.handle){
+      // File-input folder — no handle to verify, skip (files are gone after reload)
+      await LibraryDB.deleteFolder(r.id); continue;
+    }
     const ok=await LibraryDB.verifyPermission(r.handle);
     if(!ok){await LibraryDB.deleteFolder(r.id);continue;}
     const fr={id:r.id,name:r.name,handle:r.handle,samples:[]};
@@ -1168,58 +1800,34 @@ function renderPads(){
 /* ── Transport ───────────────────────────────────────────────── */
 function getPlaybackPattern(){
   return tracks.map((t,i)=>({
-    buffer:t.buffer,steps:patterns[playPatIdx].steps[i],muted:t.muted,gain:1
+    buffer:t.buffer,
+    steps:patterns[playPatIdx].steps[i],
+    muted:t.muted,
+    gain:mixerVols[i]??1
   }));
-}
-
-function onStep(idx){
-  if(idx>=globalSteps) return;
-  if(idx===0&&AudioEngine.isRunning) advancePattern();
-  document.querySelectorAll('.step-grid').forEach(g=>{
-    g.querySelectorAll('.step').forEach(s=>s.classList.remove('is-playhead'));
-    const el=g.querySelector(`.step[data-step="${idx}"]`);
-    if(el){el.classList.add('is-playhead');el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}
-  });
-  document.querySelectorAll('.song-block').forEach((b,i)=>{
-    const block=songArrangement[i];
-    b.classList.toggle('is-playing',block&&block.patternIdx===playPatIdx);
-  });
-}
-
-function advancePattern(){
-  if(!songArrangement.length) return;
-  const ci=songArrangement.findIndex(b=>b.patternIdx===playPatIdx);
-  if(ci===-1) return;
-  const cb=songArrangement[ci];
-  if(cb.loop&&playLoopsDone<cb.loopCount-1){playLoopsDone++;return;}
-  const nb=songArrangement[ci+1];
-  playLoopsDone=0;
-  playPatIdx=nb?nb.patternIdx:(songArrangement[0]?.patternIdx??0);
-  AudioEngine.updatePattern(getPlaybackPattern());
-  if(nb) showToast(`▶ ${nb.name}`);
-}
-
-function clearPlayhead(){
-  document.querySelectorAll('.step.is-playhead').forEach(s=>s.classList.remove('is-playhead'));
-  document.querySelectorAll('.song-block.is-playing').forEach(b=>b.classList.remove('is-playing'));
 }
 
 document.getElementById('playBtn').addEventListener('click',()=>{
   const pb=document.getElementById('playBtn');
-  if(AudioEngine.isRunning){AudioEngine.stop();pb.classList.remove('is-playing');clearPlayhead();return;}
+  if(AudioEngine.isRunning){
+    AudioEngine.stop();pb.classList.remove('is-playing');clearPlayhead();
+    songPlayBar=0; return;
+  }
   AudioEngine.init();
   AudioEngine.setBPM(parseInt(document.getElementById('bpmInput').value)||126);
   AudioEngine.setSteps(globalSteps);
-  playPatIdx=songArrangement.length>0?songArrangement[0].patternIdx:activePatIdx;
-  playLoopsDone=0;
+  playPatIdx=activePatIdx;
+  playLoopsDone=0; songPlayBar=0;
   AudioEngine.start(getPlaybackPattern(),onStep);
   pb.classList.add('is-playing');
 });
+
 document.getElementById('stopBtn').addEventListener('click',()=>{
   AudioEngine.stop();
   document.getElementById('playBtn').classList.remove('is-playing');
-  clearPlayhead(); playPatIdx=activePatIdx; playLoopsDone=0;
+  clearPlayhead(); playPatIdx=activePatIdx; playLoopsDone=0; songPlayBar=0;
 });
+
 document.getElementById('bpmInput').addEventListener('change',function(){
   const v=parseInt(this.value); if(v) AudioEngine.setBPM(v);
 });
@@ -1228,374 +1836,33 @@ document.getElementById('bpmInput').addEventListener('change',function(){
 document.getElementById('folderButton').addEventListener('click',openFolder);
 document.getElementById('addFolderBtn').addEventListener('click',openFolder);
 
-/* ════════════════════════════════════════════════════════════
-   PIANO ROLL
-════════════════════════════════════════════════════════════ */
-
-// Constants
-const ROLL_NOTE_HEIGHT = 14;   // px per note row
-const ROLL_TOTAL_NOTES = 88;   // A0 → C8
-const ROLL_BEAT_PX     = 80;   // px per beat at zoom 1×
-const SNAP_VALUES      = [1, 0.5, 0.25, 0.125]; // beats: 1/4, 1/8, 1/16, 1/32
-const SNAP_LABELS      = ['1/4','1/8','1/16','1/32'];
-
-// Roll state
-let rollNotes     = [];   // [{track,note,start,dur,vel}]
-let rollTool      = 'draw';
-let rollZoom      = 1;
-let rollSnapIdx   = 2;    // default 1/16
-let rollTrackIdx  = 0;
-let rollDrag      = null; // {type:'new'|'move'|'resize'|'vel', note?, startX, startY, origStart?, origDur?}
-
-// Note names for 88-key layout (A0=0 → C8=87)
-function noteNumToName(n) {
-  // n=0 is A0; MIDI note 21
-  const midi = n + 21;
-  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-  const oct   = Math.floor(midi / 12) - 1;
-  return names[midi % 12] + oct;
+/* ── Page switcher — handles lazy init of Roll, Song, Mixer ── */
+function switchPage(id) {
+  document.querySelectorAll('.page').forEach(p => { p.hidden = true; });
+  const target = document.getElementById(`page-${id}`);
+  if (target) target.hidden = false;
+  document.querySelectorAll('.nav-tab').forEach(t =>
+    t.classList.toggle('is-active', t.dataset.page === id));
+  if (id === 'pianoRoll') initRoll();
+  if (id === 'mixer')     renderMixer();
+  if (id === 'song')      initSong();
 }
-function noteIsBlack(n) {
-  const midi = (n + 21) % 12;
-  return [1,3,6,8,10].includes(midi);
-}
-function noteIsC(n) { return (n + 21) % 12 === 0; }
+// Wire nav tabs
+document.querySelectorAll('.nav-tab').forEach(t => {
+  const clone = t.cloneNode(true);
+  t.parentNode.replaceChild(clone, t);
+  clone.addEventListener('click', () => { if (!clone.disabled) switchPage(clone.dataset.page); });
+});
 
-// Build piano keys column
-function buildRollKeys() {
-  const inner = document.getElementById('rollKeysInner');
-  inner.innerHTML = '';
-  // Draw from top (C8) down to bottom (A0)
-  for (let i = ROLL_TOTAL_NOTES - 1; i >= 0; i--) {
-    const div = document.createElement('div');
-    const name = noteNumToName(i);
-    const isBlack = noteIsBlack(i);
-    const isC = noteIsC(i);
-    div.className = `roll-key-row ${isBlack ? 'is-black' : 'is-white'}${isC ? ' is-c' : ''}`;
-    div.style.height = ROLL_NOTE_HEIGHT + 'px';
-    div.textContent = (isC || (!isBlack && i % 12 === 0)) ? name : (isC ? name : '');
-    if (isC) div.textContent = name;
-    else if (!isBlack && name.startsWith('E')) div.textContent = name.replace('#','');
-    else div.textContent = isC ? name : '';
-    // Tap key to preview note
-    div.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      previewRollNote(i);
-    });
-    inner.appendChild(div);
-  }
-  inner.style.height = (ROLL_TOTAL_NOTES * ROLL_NOTE_HEIGHT) + 'px';
-}
-
-function previewRollNote(noteIdx) {
-  const track = tracks[rollTrackIdx];
-  if (!track?.buffer) return;
-  const ctx = AudioEngine.getAudioContext();
-  if (!ctx) return;
-  const src = ctx.createBufferSource();
-  src.buffer = track.buffer;
-  // noteIdx 0=A0(MIDI 21), middle C=C4(MIDI 60) → noteIdx 39
-  const semitones = (noteIdx + 21) - 60;
-  src.playbackRate.value = Math.pow(2, semitones / 12);
-  const g = ctx.createGain(); g.gain.value = 0.7;
-  src.connect(g).connect(ctx.destination);
-  src.start();
-  setTimeout(() => { try { src.stop(); } catch {} }, 400);
-}
-
-// Draw the main roll canvas
-function renderRollCanvas() {
-  const area    = document.getElementById('rollCanvasArea');
-  const canvas  = document.getElementById('rollCanvas');
-  const beatPx  = ROLL_BEAT_PX * rollZoom;
-  const beats   = Math.max(globalSteps, 32);
-  const W       = Math.ceil(beats * beatPx);
-  const H       = ROLL_TOTAL_NOTES * ROLL_NOTE_HEIGHT;
-
-  canvas.width  = W;
-  canvas.height = H;
-  area.style.height = (H + 64) + 'px'; // room for velocity below
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-
-  // Row backgrounds
-  for (let n = 0; n < ROLL_TOTAL_NOTES; n++) {
-    const y = (ROLL_TOTAL_NOTES - 1 - n) * ROLL_NOTE_HEIGHT;
-    ctx.fillStyle = noteIsBlack(n) ? '#0d0d1a' : '#10101e';
-    ctx.fillRect(0, y, W, ROLL_NOTE_HEIGHT);
-    // C line
-    if (noteIsC(n)) {
-      ctx.strokeStyle = '#3b2d6e50'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    }
-  }
-
-  // Beat grid
-  for (let b = 0; b <= beats; b++) {
-    const x = b * beatPx;
-    const isBeat = Number.isInteger(b);
-    const isBar  = b % 4 === 0;
-    ctx.strokeStyle = isBar ? '#3b2d6e60' : isBeat ? '#1e1e3240' : '#1e1e3220';
-    ctx.lineWidth   = isBar ? 1.5 : 0.8;
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-
-  // Snap grid (lighter)
-  const snapVal = SNAP_VALUES[rollSnapIdx];
-  for (let s = 0; s * snapVal < beats; s++) {
-    const x = s * snapVal * beatPx;
-    if (x % beatPx < 1) continue; // already drawn
-    ctx.strokeStyle = '#1e1e321a'; ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-
-  // Notes for active track
-  const trackNotes = rollNotes.filter(n => n.track === rollTrackIdx);
-  trackNotes.forEach(note => {
-    const x = note.start * beatPx;
-    const y = (ROLL_TOTAL_NOTES - 1 - note.note) * ROLL_NOTE_HEIGHT;
-    const w = Math.max(note.dur * beatPx - 2, 4);
-    const h = ROLL_NOTE_HEIGHT - 1;
-    // Note body
-    const grad = ctx.createLinearGradient(x, y, x, y + h);
-    grad.addColorStop(0, '#c084fc');
-    grad.addColorStop(1, '#8b5cf6');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.roundRect(x + 1, y + 1, w, h - 1, 3);
-    ctx.fill();
-    // Note border
-    ctx.strokeStyle = '#e879f9'; ctx.lineWidth = 0.8;
-    ctx.stroke();
-    // Resize handle
-    ctx.fillStyle = '#fff6';
-    ctx.fillRect(x + w - 3, y + 2, 3, h - 3);
-  });
-}
-
-// Velocity canvas
-function renderVelCanvas() {
-  const canvas  = document.getElementById('velCanvas');
-  const area    = document.getElementById('rollCanvasArea');
-  const W       = area.clientWidth || 300;
-  const H       = 64;
-  const beatPx  = ROLL_BEAT_PX * rollZoom;
-  canvas.width  = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#080810'; ctx.fillRect(0, 0, W, H);
-
-  const scrollX = document.getElementById('rollCanvasArea').scrollLeft;
-  const trackNotes = rollNotes.filter(n => n.track === rollTrackIdx);
-  trackNotes.forEach(note => {
-    const x = note.start * beatPx - scrollX;
-    if (x < -10 || x > W + 10) return;
-    const barH = Math.round(note.vel * (H - 6));
-    const grad = ctx.createLinearGradient(0, H - barH, 0, H);
-    grad.addColorStop(0, '#a855f7'); grad.addColorStop(1, '#5b21b6');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x + 1, H - barH, 7, barH);
-    // Top cap
-    ctx.fillStyle = '#c084fc';
-    ctx.fillRect(x + 1, H - barH, 7, 2);
-  });
-}
-
-function snapBeat(beat) {
-  const s = SNAP_VALUES[rollSnapIdx];
-  return Math.round(beat / s) * s;
-}
-
-function xToBeat(x) {
-  return x / (ROLL_BEAT_PX * rollZoom);
-}
-
-function yToNote(y) {
-  return ROLL_TOTAL_NOTES - 1 - Math.floor(y / ROLL_NOTE_HEIGHT);
-}
-
-function findNoteAt(beat, noteIdx) {
-  return rollNotes.find(n =>
-    n.track === rollTrackIdx &&
-    n.note === noteIdx &&
-    beat >= n.start &&
-    beat < n.start + n.dur
-  );
-}
-
-function findNoteResizeAt(beat, noteIdx) {
-  // Within 2px of right edge
-  const threshold = 2 / (ROLL_BEAT_PX * rollZoom);
-  return rollNotes.find(n =>
-    n.track === rollTrackIdx &&
-    n.note === noteIdx &&
-    Math.abs(beat - (n.start + n.dur)) < threshold
-  );
-}
-
-// Canvas pointer events
-const rollCanvas = document.getElementById('rollCanvas');
-
-rollCanvas.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  rollCanvas.setPointerCapture(e.pointerId);
-  const rect   = rollCanvas.getBoundingClientRect();
-  const scaleX = rollCanvas.width / rect.width;
-  const scaleY = rollCanvas.height / rect.height;
-  const cx     = (e.clientX - rect.left) * scaleX;
-  const cy     = (e.clientY - rect.top)  * scaleY;
-  const beat   = xToBeat(cx);
-  const note   = yToNote(cy);
-
-  if (rollTool === 'draw') {
-    // Check resize handle first
-    const resizeNote = findNoteResizeAt(beat, note);
-    if (resizeNote) {
-      rollDrag = { type: 'resize', note: resizeNote, startX: cx, origDur: resizeNote.dur };
-      return;
-    }
-    // Check move
-    const existNote = findNoteAt(beat, note);
-    if (existNote) {
-      rollDrag = { type: 'move', note: existNote, startX: cx, startY: cy, origStart: existNote.start, origNote: existNote.note };
-      return;
-    }
-    // New note
-    const snapped = snapBeat(beat);
-    const newNote = { track: rollTrackIdx, note, start: snapped, dur: SNAP_VALUES[rollSnapIdx], vel: 0.8 };
-    rollNotes.push(newNote);
-    rollDrag = { type: 'resize', note: newNote, startX: cx, origDur: SNAP_VALUES[rollSnapIdx] };
-    previewRollNote(note);
-    renderRollCanvas(); renderVelCanvas();
-
-  } else if (rollTool === 'erase') {
-    const existNote = findNoteAt(beat, note);
-    if (existNote) {
-      rollNotes.splice(rollNotes.indexOf(existNote), 1);
-      renderRollCanvas(); renderVelCanvas();
-    }
-
-  } else if (rollTool === 'select') {
-    rollDrag = { type: 'select', startX: cx, startY: cy };
+/* ── patSend now refreshes song pattern strip ── */
+document.getElementById('patSend').addEventListener('click',()=>{
+  const p = activePat();
+  showToast(`✓ ${p.name} ready — go to Song to place it`);
+  if (!document.getElementById('page-song').hidden) {
+    renderSongPatStrip();
   }
 });
 
-rollCanvas.addEventListener('pointermove', e => {
-  if (!rollDrag) return;
-  const rect   = rollCanvas.getBoundingClientRect();
-  const scaleX = rollCanvas.width / rect.width;
-  const scaleY = rollCanvas.height / rect.height;
-  const cx     = (e.clientX - rect.left) * scaleX;
-  const cy     = (e.clientY - rect.top)  * scaleY;
-  const beat   = xToBeat(cx);
-
-  if (rollDrag.type === 'resize') {
-    const newDur = Math.max(SNAP_VALUES[rollSnapIdx], snapBeat(beat - rollDrag.note.start));
-    rollDrag.note.dur = newDur;
-    renderRollCanvas(); renderVelCanvas();
-
-  } else if (rollDrag.type === 'move') {
-    const dx    = cx - rollDrag.startX;
-    const dy    = cy - rollDrag.startY;
-    const dBeat = xToBeat(dx);
-    const dNote = -Math.round(dy / ROLL_NOTE_HEIGHT);
-    rollDrag.note.start = Math.max(0, snapBeat(rollDrag.origStart + dBeat));
-    rollDrag.note.note  = Math.max(0, Math.min(ROLL_TOTAL_NOTES - 1, rollDrag.origNote + dNote));
-    renderRollCanvas();
-  }
-});
-
-rollCanvas.addEventListener('pointerup', () => { rollDrag = null; });
-
-// Velocity canvas drag
-document.getElementById('velCanvas').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  const canvas  = document.getElementById('velCanvas');
-  const area    = document.getElementById('rollCanvasArea');
-  const rect    = canvas.getBoundingClientRect();
-  const x       = e.clientX - rect.left + area.scrollLeft;
-  const y       = e.clientY - rect.top;
-  const beatPx  = ROLL_BEAT_PX * rollZoom;
-  const beat    = x / beatPx;
-  // Find nearest note
-  const closest = rollNotes
-    .filter(n => n.track === rollTrackIdx)
-    .reduce((best, n) => {
-      const dist = Math.abs(n.start * beatPx - x);
-      return (!best || dist < best.dist) ? { note: n, dist } : best;
-    }, null);
-  if (closest && closest.dist < 20) {
-    const newVel = Math.max(0.05, Math.min(1, 1 - y / 64));
-    closest.note.vel = newVel;
-    renderVelCanvas();
-  }
-});
-
-// Sync key column scroll with canvas area
-document.getElementById('rollCanvasArea').addEventListener('scroll', function() {
-  document.getElementById('rollKeysInner').style.top = `-${this.scrollTop}px`;
-  renderVelCanvas();
-});
-
-// Tool buttons
-document.querySelectorAll('.roll-tool-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    rollTool = btn.dataset.tool;
-    document.querySelectorAll('.roll-tool-btn').forEach(b => b.classList.toggle('is-active', b === btn));
-    rollCanvas.style.cursor = rollTool === 'erase' ? 'not-allowed' : rollTool === 'select' ? 'default' : 'crosshair';
-  });
-});
-
-// Snap cycle
-document.getElementById('rollSnapBtn').addEventListener('click', () => {
-  rollSnapIdx = (rollSnapIdx + 1) % SNAP_VALUES.length;
-  document.getElementById('rollSnapBtn').textContent = SNAP_LABELS[rollSnapIdx];
-  renderRollCanvas();
-});
-
-// Zoom
-document.getElementById('rollZoomIn').addEventListener('click', () => {
-  rollZoom = Math.min(rollZoom * 1.5, 8);
-  document.getElementById('rollZoomLbl').textContent = rollZoom.toFixed(1) + '×';
-  renderRollCanvas(); renderVelCanvas();
-});
-document.getElementById('rollZoomOut').addEventListener('click', () => {
-  rollZoom = Math.max(rollZoom / 1.5, 0.25);
-  document.getElementById('rollZoomLbl').textContent = rollZoom.toFixed(1) + '×';
-  renderRollCanvas(); renderVelCanvas();
-});
-
-// Track selector
-function buildRollTrackSel() {
-  const sel = document.getElementById('rollTrackSel');
-  sel.innerHTML = '';
-  tracks.forEach((t, i) => {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = t.name ? `${t.label} — ${t.name.replace(/\.[^.]+$/, '').slice(0,18)}` : `Track ${i+1} (empty)`;
-    sel.appendChild(opt);
-  });
-  sel.value = rollTrackIdx;
-}
-document.getElementById('rollTrackSel').addEventListener('change', function() {
-  rollTrackIdx = parseInt(this.value);
-  renderRollCanvas(); renderVelCanvas();
-});
-
-function initRoll() {
-  buildRollKeys();
-  buildRollTrackSel();
-  renderRollCanvas();
-  renderVelCanvas();
-  // Scroll to middle C area
-  setTimeout(() => {
-    const area = document.getElementById('rollCanvasArea');
-    // Middle C (C4) = MIDI 60, noteIdx = 39 from bottom
-    const middleCY = (ROLL_TOTAL_NOTES - 1 - 39) * ROLL_NOTE_HEIGHT;
-    area.scrollTop = Math.max(0, middleCY - area.clientHeight / 2);
-  }, 50);
-}
 
 /* ════════════════════════════════════════════════════════════
    MIXER
@@ -1741,46 +2008,58 @@ const _origSwitchPage = switchPage;
 // Override switchPage
 window.switchPage = function(id) {
   document.querySelectorAll('.page').forEach(p => { p.hidden = true; });
-  const target = document.getElementById(`page-${id}`);
-  if (target) target.hidden = false;
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('is-active', t.dataset.page === id));
-  if (id === 'pianoRoll') initRoll();
-  if (id === 'mixer') renderMixer();
-};
-// Re-wire nav tabs to use window.switchPage
-document.querySelectorAll('.nav-tab').forEach(t => {
-  // Remove old listeners by replacing element
-  const clone = t.cloneNode(true);
-  t.parentNode.replaceChild(clone, t);
-  clone.addEventListener('click', () => { if (!clone.disabled) window.switchPage(clone.dataset.page); });
-});
+/* ── onStep — fires per sequencer tick ── */
+function onStep(idx) {
+  if (idx >= globalSteps) return;
+  // Step highlight on Channel Rack
+  document.querySelectorAll('.step-grid').forEach(g => {
+    g.querySelectorAll('.step').forEach(s => s.classList.remove('is-playhead'));
+    const el = g.querySelector(`.step[data-step="${idx}"]`);
+    if (el) { el.classList.add('is-playhead'); el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  });
+  // VU meters
+  tracks.forEach((t, i) => {
+    if (!t.muted && t.buffer && patterns[playPatIdx]?.steps[i]?.[idx]) vuPulse(i);
+  });
+  // Piano roll playhead
+  const ph = document.getElementById('rollPlayheadLine');
+  if (ph && !document.getElementById('page-pianoRoll').hidden) {
+    ph.style.left = (idx * ROLL_BEAT_PX * rollZoom / 4) + 'px';
+    ph.hidden = false;
+  }
+  // Song playhead
+  songPlayBar = Math.floor(idx / globalSteps * SONG_BARS);
+  if (!document.getElementById('page-song').hidden) renderSongCanvas();
+  // Pattern auto-advance if song has clips
+  if (idx === 0 && AudioEngine.isRunning && songClips.length > 0) advanceSongPattern();
+}
 
-/* ── Patch onStep to trigger VU meters ── */
-function patchedOnStep(idx) {
-  onStep(idx);
-  // VU pulse for every active step
-  if (idx < globalSteps) {
-    tracks.forEach((t, i) => {
-      if (!t.muted && t.buffer && patterns[playPatIdx]?.steps[i]?.[idx]) {
-        vuPulse(i);
-      }
-    });
-    // Update piano roll playhead
-    const ph = document.getElementById('rollPlayheadLine');
-    if (ph && !document.getElementById('page-pianoRoll').hidden) {
-      const x = idx * (ROLL_BEAT_PX * rollZoom / 4);
-      ph.style.left = x + 'px';
-      ph.hidden = false;
-    }
+function advanceSongPattern() {
+  // Find next clip past current bar
+  const nextClip = songClips
+    .filter(c => c.bar > songPlayBar)
+    .sort((a, b) => a.bar - b.bar)[0];
+  if (nextClip && nextClip.patternIdx !== playPatIdx) {
+    playPatIdx = nextClip.patternIdx;
+    AudioEngine.updatePattern(getPlaybackPattern());
   }
 }
 
-
+function clearPlayhead() {
+  document.querySelectorAll('.step.is-playhead').forEach(s => s.classList.remove('is-playhead'));
+  const ph = document.getElementById('rollPlayheadLine');
+  if (ph) ph.hidden = true;
+}
 
 /* ── Init ────────────────────────────────────────────────────── */
-async function init(){
+async function init() {
   AudioEngine.setSteps(globalSteps);
-  renderRack(); renderPads(); renderSong(); updatePatNav(); renderMixer();
+  document.getElementById('stepsVal').textContent = globalSteps;
+  document.getElementById('bottomPlayer').style.display = 'none';
+  renderRack();
+  renderPads();
+  updatePatNav();
+  renderMixer();
   await restoreLibrary();
 }
 init();
